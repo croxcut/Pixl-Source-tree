@@ -14,7 +14,7 @@ struct Window{
 extern struct Window window;
 
 
-void create(FWindow init, FWindow render, FWindow update, FWindow cleanup);
+void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup);
 void loop();
 
 #endif
