@@ -6,7 +6,7 @@ void create(FWindow init, FWindow render, FWindow update, FWindow cleanup) {
 
     if(!glfwInit()) {
         printf("[Engine]: Failed to Initialize GLFW!");
-        return -1;
+        return;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
