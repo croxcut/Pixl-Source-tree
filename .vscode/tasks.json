@@ -39,7 +39,7 @@
                     // Include .cpp files here (These are for .h file code)
                     // "${workspaceRoot}/src/shader.cpp",
                     // "${workspaceRoot}/src/engine.cpp",
-                    
+                    "${workspaceRoot}/src/engine/Window.c",
                     "-g",
                     "--std=c++17",
                     "-I${workspaceRoot}/dependencies/GLFW/include",
