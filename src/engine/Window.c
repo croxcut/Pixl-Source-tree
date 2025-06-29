@@ -9,6 +9,8 @@ void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup
     window.update = update;
     window.render = render;
     window.cleanup = cleanup;
+    
+    printf("[Engine] : Starting...\n");
 
     if(!glfwInit()) {
         printf("[Engine] : Failed to Initialize GLFW!\n");
@@ -35,8 +37,9 @@ void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup
 
     glViewport(0, 0, 600, 400);
 
-    glfwSetFramebufferSizeCallback(window.handle, _size_callback);
+    glfwSwapInterval(0);
 
+    glfwSetFramebufferSizeCallback(window.handle, _size_callback);
 }   
 
 
@@ -62,7 +65,12 @@ static void _cleanup() {
 void loop() {
     _init();
 
+    printf("[Engine] : Running...");
+
     while(!glfwWindowShouldClose(window.handle)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         _update();
 
         _render();
