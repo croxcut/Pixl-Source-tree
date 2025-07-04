@@ -23,10 +23,6 @@ static u32 _compile(const char* path, GLenum type) {
 
     size_t str_size = fread(buffer, 1, length, file);
     buffer[str_size] = '\0';
-    
-    if (str_size != length) {
-        fprintf(stderr, "Warning: Shader file not fully read.\n");
-    }
 
     fclose(file);
     
@@ -39,7 +35,7 @@ static u32 _compile(const char* path, GLenum type) {
     return handle;
 }
 
-struct Shader create_shader(const char* vs_path, const char* fs_path) {
+struct Shader shader_create(const char* vs_path, const char* fs_path) {
     struct Shader self;
 
     self.vs_handle = _compile(vs_path, GL_VERTEX_SHADER);

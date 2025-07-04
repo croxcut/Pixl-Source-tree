@@ -71,7 +71,7 @@ void render() {
 }
 
 void cleanup() {
-
+    shader_delete(shader);
 }
 
 int main(int argc, char* argv[]) {
