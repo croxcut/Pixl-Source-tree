@@ -56,7 +56,7 @@ void init() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    shader = create_shader("res/shader/shader.vert", "res/shader/shader.frag");
+    shader = shader_create("./res/shader/shader.vert", "./res/shader/shader.frag");
     
 }
 

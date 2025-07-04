@@ -16,7 +16,7 @@ static u32 _compile(const char* path, GLenum type) {
 
     char* buffer = (char*) malloc(length + 1);
     if(!buffer) {
-        perror("Memory Allocation Failed!");
+        perror("Shader Mem Alloc");
         fclose(file);
         return 0;
     }
