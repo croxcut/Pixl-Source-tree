@@ -16,7 +16,8 @@ INCLUDES = -I$(GLFW_DIR)/include \
 # Source files
 SOURCES = $(SRC_DIR)/main.c \
           $(SRC_DIR)/engine/Window.c \
-          $(GLAD_DIR)/src/glad.c
+		  $(SRC_DIR)/engine/gfx/Shader.c \
+          $(GLAD_DIR)/src/glad.c 
 
 # Output binary
 OUTPUT = $(BUILD_DIR)/main.exe
