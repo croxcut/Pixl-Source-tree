@@ -72,7 +72,7 @@ void render() {
     float timeVal = glfwGetTime();
     float greenValue = (sin(timeVal) / 2.0f) + 0.5f;
     int vertexColorLocation = glGetUniformLocation(shader.handle, "ourColor");
-    shader_use(shader);
+    shader_use(&shader);
     glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 0.0f);
 
     glBindVertexArray(VAO);
@@ -80,7 +80,7 @@ void render() {
 }
 
 void cleanup() {
-    shader_delete(shader);
+    shader_delete(&shader);
 }
 
 int main(int argc, char* argv[]) {

@@ -1,5 +1,16 @@
 #include "Shader.h"
 
+void shader_uniform_setBool(struct Shader* self, const char* name, bool value) {
+    glUniform1i(glGetUniformLocation(self->handle, name), (int)value);
+}
+
+void shader_uniform_setInt(struct Shader* self, const char* name, int value) {
+    glUniform1i(glGetUniformLocation(self->handle, name), value);
+}
+
+void shader_uniform_setFloat(struct Shader* self, const char* name, float value) {
+    glUniform1f(glGetUniformLocation(self->handle, name), (int)value);
+}
 
 
 static u32 _compile(const char* path, GLenum type) {
@@ -50,12 +61,12 @@ struct Shader shader_create(const char* vs_path, const char* fs_path) {
     return self;
 }
 
-void shader_delete(struct Shader self) {
-    glDeleteProgram(self.handle);
-    glDeleteShader(self.vs_handle);    
-    glDeleteShader(self.fs_handle);    
+void shader_delete(struct Shader* self) {
+    glDeleteProgram(self->handle);
+    glDeleteShader(self->vs_handle);    
+    glDeleteShader(self->fs_handle);    
 }
 
-void shader_use(struct Shader self) {
-    glUseProgram(self.handle);
+void shader_use(struct Shader* self) {
+    glUseProgram(self->handle);
 }
