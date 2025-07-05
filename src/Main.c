@@ -21,13 +21,13 @@
 // };
 
 float vertices[] = {
-     0.5f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
+     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
 
-     0.45f,  0.5f, 0.0f,
-    -0.55f, -0.5f, 0.0f,        
-    -0.55f,  0.5f, 0.0f  
+     0.45f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 
+    -0.55f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,       
+    -0.55f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
 };
 
 unsigned int indices[] = {
@@ -53,8 +53,11 @@ void init() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof indices, indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     shader = shader_create("./res/shader/shader.vert", "./res/shader/shader.frag");
     
@@ -65,7 +68,13 @@ void update() {
 }
 
 void render() { 
+    
+    float timeVal = glfwGetTime();
+    float greenValue = (sin(timeVal) / 2.0f) + 0.5f;
+    int vertexColorLocation = glGetUniformLocation(shader.handle, "ourColor");
     shader_use(shader);
+    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 0.0f);
+
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

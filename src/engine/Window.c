@@ -44,12 +44,12 @@ void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup
 
 
 static void _init() {
+    printf("[Engine] : Intializing...\n");
     window.init();
 }
 
 static void _render() {
     window.render();
-
 }
 
 static void _update() {
@@ -60,6 +60,7 @@ static void _cleanup() {
     window.cleanup();
 
     glfwTerminate();
+    printf("[Engine] : Shutdown...");
 }
 
 void loop() {
