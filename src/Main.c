@@ -69,11 +69,8 @@ void update() {
 
 void render() { 
     
-    float timeVal = glfwGetTime();
-    float greenValue = (sin(timeVal) / 2.0f) + 0.5f;
-    int vertexColorLocation = glGetUniformLocation(shader.handle, "ourColor");
     shader_use(&shader);
-    glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 0.0f);
+    shader_uniform_setFloat(&shader, "someuniform", 1.0f);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
