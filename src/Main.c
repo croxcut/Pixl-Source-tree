@@ -70,7 +70,6 @@ void update() {
 void render() { 
     
     shader_use(&shader);
-    shader_uniform_setFloat(&shader, "someuniform", 1.0f);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -83,7 +82,7 @@ void cleanup() {
 int main(int argc, char* argv[]) {
 
     window_create(init, update, render, cleanup);
-    loop();
+    window_loop();
 
     return 0;
 }

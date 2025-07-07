@@ -63,7 +63,7 @@ static void _cleanup() {
     printf("[Engine] : Shutdown...");
 }
 
-void loop() {
+void window_loop() {
     _init();
 
     printf("[Engine] : Running...");

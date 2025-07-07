@@ -12,7 +12,6 @@ void shader_uniform_setFloat(struct Shader* self, const char* name, float value)
     glUniform1f(glGetUniformLocation(self->handle, name), (int)value);
 }
 
-
 static u32 _compile(const char* path, GLenum type) {
 
     FILE* file = fopen(path, "r");

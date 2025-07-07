@@ -15,6 +15,6 @@ extern struct Window window;
 
 
 void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup);
-void loop();
+void window_loop();
 
 #endif
