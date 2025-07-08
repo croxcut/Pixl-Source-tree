@@ -21,7 +21,7 @@ void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window.handle = glfwCreateWindow(600, 400, "Just A Window", NULL, NULL);
+    window.handle = glfwCreateWindow(500, 500, "Just A Window", NULL, NULL);
     if(window.handle == NULL) {
         printf("[Engine] : Failed to Create Window!\n");
         return;    
@@ -35,7 +35,7 @@ void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup
         return;
     }
 
-    glViewport(0, 0, 600, 400);
+    glViewport(0, 0, 500, 500);
 
     glfwSwapInterval(0);
 
@@ -60,13 +60,13 @@ static void _cleanup() {
     window.cleanup();
 
     glfwTerminate();
-    printf("[Engine] : Shutdown...");
+    printf("[Engine] : Shutdown...\n");
 }
 
 void window_loop() {
     _init();
 
-    printf("[Engine] : Running...");
+    printf("[Engine] : Running...\n");
 
     while(!glfwWindowShouldClose(window.handle)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
