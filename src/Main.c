@@ -75,7 +75,7 @@ void init() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    shader = shader_create("./res/shader/shader.vert", "./res/shader/shader.frag");
+    shader = shader_create("./res/shader/vert.glsl", "./res/shader/frag.glsl");
     
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -109,6 +109,8 @@ void render() {
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    
 }
 
 void cleanup() {
