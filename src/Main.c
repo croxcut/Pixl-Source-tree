@@ -110,8 +110,7 @@ void render() {
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-    
-}
+}   
 
 void cleanup() {
     shader_delete(&shader);
