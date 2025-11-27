@@ -1,12 +1,12 @@
 CXX = g++
-CFLAGS = -g --std=c++17 -static
+CFLAGS = -g --std=c++17 -static -O2
 
 # Directories
 SRC_DIR = src
 GLAD_DIR = dependencies/GLAD
 GLFW_DIR = dependencies/GLFW
 GLM_DIR = dependencies/GLM
-BUILD_DIR = builds/windows
+BUILD_DIR = builds
 
 # Include paths
 INCLUDES = -I$(GLFW_DIR)/include \
@@ -14,9 +14,8 @@ INCLUDES = -I$(GLFW_DIR)/include \
            -I$(GLM_DIR)
 
 # Source files
-SOURCES = $(SRC_DIR)/main.c \
-          $(SRC_DIR)/engine/Window.c \
-		  $(SRC_DIR)/engine/gfx/Shader.c \
+SOURCES = $(SRC_DIR)/main.cpp \
+          $(SRC_DIR)/engine/Window.cpp \
           $(GLAD_DIR)/src/glad.c 
 
 # Output binary
@@ -35,10 +34,5 @@ run: all
 $(OUTPUT): $(SOURCES)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CFLAGS) $(INCLUDES) $^ -o $@ $(LIBS)
-
-# Clean build directory
-clean:
-	@echo Cleaning...
-	@rm -rf $(BUILD_DIR)
 
 .PHONY: all clean

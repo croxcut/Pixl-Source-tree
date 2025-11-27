@@ -1,20 +1,33 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef __WINDOW__
+#define __WINDOW__
 
-#include "./util/Util.h"
+#include "util/Util.h"
 
-typedef void (*FWindow)();
+#include "gfx/IAppLogic.h"
 
+class Window{
 
-struct Window{
+private:
     GLFWwindow* handle;
-    FWindow init, render, update, cleanup;
+    IAppLogic& appLogic;
+
+private:
+    Window(IAppLogic& logic);
+    void _init();
+    void _tick();
+    void _render();
+    void _cleanup();
+
+public:
+    
+    static Window& createWindow(IAppLogic& logic);
+    GLFWwindow* getWindow();
+
+    void start();
+    void cleanup();
+
+    ~Window();
+
 };
-
-extern struct Window window;
-
-
-void window_create(FWindow init, FWindow render, FWindow update, FWindow cleanup);
-void window_loop();
 
 #endif
