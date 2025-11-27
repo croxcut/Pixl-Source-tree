@@ -1,11 +1,11 @@
-#ifndef __IGRAPHICS_DEVICE__
-#define __IGRPAHICS_DEVICE__
+#ifndef __IGRAPHICS__
+#define __IGRAPHICS__
 
-class IGraphicsDevice
+class IGraphics
 {
 public:
     
-    virtual ~IGraphicsDevice() = default;
+    virtual ~IGraphics() = default;
 
     virtual void init() = 0;
 
@@ -15,6 +15,5 @@ public:
     virtual void cleanup() = 0;
 
 };
-
 
 #endif

@@ -1,8 +1,17 @@
 #include "OpenGLDevice.h"
 
-void OpenGLDevice::init() {
+OpenGLDevice& OpenGLDevice::get() {
+    static OpenGLDevice instance;
+    return instance;
+}
 
+void OpenGLDevice::init() {
     
+}
+
+void OpenGLDevice::createTexture() {
+
+
 }
 
 void OpenGLDevice::draw() {

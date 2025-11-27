@@ -16,6 +16,8 @@ INCLUDES = -I$(GLFW_DIR)/include \
 # Source files
 SOURCES = $(SRC_DIR)/main.cpp \
           $(SRC_DIR)/engine/Window.cpp \
+          $(SRC_DIR)/engine/gfx/renderer/*.cpp \
+          $(SRC_DIR)/engine/gfx/renderer/opengl/*.cpp \
           $(GLAD_DIR)/src/glad.c 
 
 # Output binary
