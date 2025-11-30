@@ -1,17 +1,19 @@
 
-#include "engine/Window.h"
-#include "engine/gfx/renderer/Renderer.h"
+#include "../pixl/src/engine/Window.h"
+#include "../pixl/src/engine/gfx/renderer/Renderer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 
 class Main : public IAppLogic{
 
+private:
+
+    Renderer& renderer = Renderer::get();
+
 public:
 
     void init() override {
-        std::cout << "Initializing" << std::endl;
-
-        _renderer.init(GraphicsApi::Opengl);
+        renderer.init(GraphicsApi::Opengl);
     };
 
     void tick() override {
@@ -19,14 +21,11 @@ public:
     };
 
     void render() override {
-        // std::cout << "Rendering" << std::endl;
-
-        _renderer.draw();
+        renderer.draw();
     };
 
     void cleanup() override {
-        std::cout << "Exiting" << std::endl;
-        _renderer.cleanup();
+        renderer.cleanup();
     }
 
 };

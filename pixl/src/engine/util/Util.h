@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef __UTIL__
+#define __UTIL__
 
 #include "stb_image.h"
 
@@ -13,5 +13,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+
+#include "Types.h"
 
 #endif

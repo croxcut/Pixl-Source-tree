@@ -2,11 +2,12 @@ CXX = g++
 CFLAGS = -g --std=c++17 -static -O2
 
 # Directories
-SRC_DIR = src
+SRC_DIR = pixl/src
 GLAD_DIR = dependencies/GLAD
 GLFW_DIR = dependencies/GLFW
 GLM_DIR = dependencies/GLM
 BUILD_DIR = builds
+GAME_DIR = game
 
 # Include paths
 INCLUDES = -I$(GLFW_DIR)/include \
@@ -14,7 +15,7 @@ INCLUDES = -I$(GLFW_DIR)/include \
            -I$(GLM_DIR)
 
 # Source files
-SOURCES = $(SRC_DIR)/main.cpp \
+SOURCES = $(GAME_DIR)/main.cpp \
           $(SRC_DIR)/engine/Window.cpp \
           $(SRC_DIR)/engine/gfx/renderer/*.cpp \
           $(SRC_DIR)/engine/gfx/renderer/opengl/*.cpp \

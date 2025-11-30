@@ -4,6 +4,7 @@
 #include "util/Util.h"
 
 #include "gfx/IAppLogic.h"
+#include "util/Log.h"
 
 class Window{
 

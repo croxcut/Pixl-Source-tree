@@ -9,10 +9,11 @@ Window::Window(IAppLogic& logic) :
     appLogic(logic) 
 {
 
-    std::cout << "[Engine] : Started" << std::endl;
+    Log(INFO, "Started...");
 
     if(!glfwInit()) {
-        std::cout << "Failed to Initialize GLFW!" << std::endl;
+        // std::cout << "Failed to Initialize GLFW!" << std::endl;  
+        Log(ERROR, "Failed to Initialize GLFW!");
         return;
     }
 
@@ -22,7 +23,8 @@ Window::Window(IAppLogic& logic) :
 
     handle = glfwCreateWindow(800, 600, "TestWindow", NULL, NULL);
     if(handle == NULL) {
-        std::cout << "Failed to create Window" << std::endl;
+        // std::cout << "Failed to create Window" << std::endl;
+        Log(ERROR, "Faild to Create Window!");
         glfwTerminate();
         return;
     } 
@@ -31,7 +33,8 @@ Window::Window(IAppLogic& logic) :
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        // std::cout << "Failed to initialize GLAD" << std::endl;
+        Log(ERROR, "Failed to initialize GLAD!");
         return;
     }    
 
@@ -40,6 +43,8 @@ Window::Window(IAppLogic& logic) :
     glfwSetFramebufferSizeCallback(handle, framebuffer_size_callback);  
 
     glfwSwapInterval(0);
+
+    Log(INFO, "Successfully Created Window!");
 }
 
 Window::~Window() {

@@ -2,8 +2,15 @@
 #define __OPENGL_RENDERER__
 
 #include "../IGraphics.h"
+#include "../../../util/Util.h"
+#include "../../../util/Log.h"
 
 class OpenGLDevice : public IGraphics{    
+
+private:
+
+    u32 VBO, VAO;
+    u32 vertexShader, fragmentShader, shaderProgram;
 
 public:
     static OpenGLDevice& get();
@@ -16,6 +23,10 @@ public:
     
     void cleanup() override;
 
+private:
+
+    OpenGLDevice();
+    // ~OpenGLDevice() = default;
 };  
 
 #endif

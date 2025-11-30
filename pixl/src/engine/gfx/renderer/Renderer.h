@@ -29,6 +29,4 @@ private:
 
 };
 
-inline Renderer& _renderer = Renderer::get();
-
 #endif

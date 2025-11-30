@@ -8,8 +8,6 @@ Renderer& Renderer::get() {
 }
 
 void Renderer::init(GraphicsApi api) {
-    std::cout << "Renderer : Started" << std::endl;
-
     switch(api) {
         case GraphicsApi::Opengl:
             m_device = &OpenGLDevice::get();
@@ -22,12 +20,11 @@ void Renderer::init(GraphicsApi api) {
 }
 
 void Renderer::draw() {
-    std::cout << "Renderer : Draw" << std::endl;
-
     if(m_device) m_device->draw();
 }
 
 IGraphics& Renderer::device() {
+    assert(m_device != nullptr);
     return *m_device;
 }
 
