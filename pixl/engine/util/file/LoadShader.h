@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 
-#include "Log.h"
+#include "../Log.h"
 
 inline std::string loadShaderFromFile(const char* shaderFile) {
 
