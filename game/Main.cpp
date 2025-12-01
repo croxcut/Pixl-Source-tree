@@ -1,6 +1,6 @@
 
-#include "../pixl/src/engine/Window.h"
-#include "../pixl/src/engine/gfx/renderer/Renderer.h"
+#include "../pixl/engine/Window.h"
+#include "../pixl/engine/gfx/renderer/Renderer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 

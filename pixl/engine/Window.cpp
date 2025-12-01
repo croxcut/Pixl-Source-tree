@@ -9,11 +9,11 @@ Window::Window(IAppLogic& logic) :
     appLogic(logic) 
 {
 
-    Log(INFO, "Started...");
+    LOG(INFO, "Started...");
 
     if(!glfwInit()) {
         // std::cout << "Failed to Initialize GLFW!" << std::endl;  
-        Log(ERROR, "Failed to Initialize GLFW!");
+        LOG(ERROR, "Failed to Initialize GLFW!");
         return;
     }
 
@@ -24,7 +24,7 @@ Window::Window(IAppLogic& logic) :
     handle = glfwCreateWindow(800, 600, "TestWindow", NULL, NULL);
     if(handle == NULL) {
         // std::cout << "Failed to create Window" << std::endl;
-        Log(ERROR, "Faild to Create Window!");
+        LOG(ERROR, "Faild to Create Window!");
         glfwTerminate();
         return;
     } 
@@ -34,7 +34,7 @@ Window::Window(IAppLogic& logic) :
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         // std::cout << "Failed to initialize GLAD" << std::endl;
-        Log(ERROR, "Failed to initialize GLAD!");
+        LOG(ERROR, "Failed to initialize GLAD!");
         return;
     }    
 
@@ -44,7 +44,7 @@ Window::Window(IAppLogic& logic) :
 
     glfwSwapInterval(0);
 
-    Log(INFO, "Successfully Created Window!");
+    LOG(INFO, "Successfully Created Window!");
 }
 
 Window::~Window() {

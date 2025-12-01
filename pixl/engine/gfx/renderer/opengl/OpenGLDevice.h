@@ -9,7 +9,7 @@ class OpenGLDevice : public IGraphics{
 
 private:
 
-    u32 VBO, VAO;
+    u32 VBO, VAO, EBO;
     u32 vertexShader, fragmentShader, shaderProgram;
 
 public:

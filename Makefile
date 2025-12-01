@@ -2,7 +2,7 @@ CXX = g++
 CFLAGS = -g --std=c++17 -static -O2
 
 # Directories
-SRC_DIR = pixl/src
+SRC_DIR = pixl
 GLAD_DIR = dependencies/GLAD
 GLFW_DIR = dependencies/GLFW
 GLM_DIR = dependencies/GLM
