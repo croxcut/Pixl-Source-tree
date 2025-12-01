@@ -1,18 +1,18 @@
 #ifndef __SHADER__
 #define __SHADER__
 
-#include "../../../util/file/LoadShader.h"
-#include "../../../util/Util.h"
+#include "../../../../util/file/LoadShader.h"
+#include "../../../../util/Util.h"
 
 
-class Shader{
+class GLShader{
 
 private:
     u32 vertexShader, fragmentShader;
     u32 programID;
 
 public:
-    Shader(const char* vertexShaderPath, const char* fragmentShaderPath);
+    GLShader(const char* vertexShaderPath, const char* fragmentShaderPath);
 
     void use();
 
@@ -22,7 +22,7 @@ public:
 
 private:
 
-    Shader() = default;
+    // Shader() = default;
 
     void compile(u32 *shader);
     void createShader(const char* shaderSource, u32 *shader, GLuint shaderType);

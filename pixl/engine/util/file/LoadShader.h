@@ -4,13 +4,12 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cstring>
 
 #include "../Log.h"
 
-inline std::string loadShaderFromFile(const char* shaderFile) {
-
+inline const char* loadShaderFromFile(const char* shaderFile) {
     std::ifstream shader_t(shaderFile);
-    
     ASSERT(shader_t, "Failed to Open Shader File at: %s", shaderFile);
 
     std::string content(
@@ -18,7 +17,9 @@ inline std::string loadShaderFromFile(const char* shaderFile) {
         std::istreambuf_iterator<char>()
     );
 
-    return content;
+    char* buffer = new char[content.size() + 1];
+    std::memcpy(buffer, content.c_str(), content.size() + 1);
+    return buffer; 
 }
 
 #endif

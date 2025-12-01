@@ -9,7 +9,7 @@ Window::Window(IAppLogic& logic) :
     appLogic(logic) 
 {
 
-    LOG(INFO, "Started...");
+    LOG(INFO, "Initializing Engine...");
 
     if(!glfwInit()) {
         // std::cout << "Failed to Initialize GLFW!" << std::endl;  
@@ -45,6 +45,7 @@ Window::Window(IAppLogic& logic) :
     glfwSwapInterval(0);
 
     LOG(INFO, "Successfully Created Window!");
+    LOG(INFO, "Initializing Engine Done!");        
 }
 
 Window::~Window() {

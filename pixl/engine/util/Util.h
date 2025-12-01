@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+#include <memory>
+#include <vector>
 
 #include "Types.h"
 

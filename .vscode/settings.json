@@ -4,6 +4,7 @@
         "types.h": "c",
         "memory": "cpp",
         "format": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "new": "cpp"
     }
 }
