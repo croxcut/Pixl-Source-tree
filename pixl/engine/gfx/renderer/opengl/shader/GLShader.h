@@ -1,5 +1,5 @@
-#ifndef __SHADER__
-#define __SHADER__
+#ifndef __GL_SHADER__
+#define __GL_SHADER__
 
 #include "../../../../util/file/LoadShader.h"
 #include "../../../../util/Util.h"
@@ -19,6 +19,10 @@ public:
     void setBool(const std::string &name, bool value) const;  
     void setInt(const std::string &name, int value) const;   
     void setFloat(const std::string &name, float value) const;
+
+    u32 getProgramID() { return programID; };
+
+    void cleanup();
 
 private:
 

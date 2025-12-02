@@ -3,27 +3,28 @@
 
 #include "../IRenderer.h"
 #include "shader/GLShader.h"
-#include "GLMesh.h"
+#include "../../../util/Log.h"
 
 class OpenGLRenderer : public IRenderer {
 
 private:
-    GLShader* shader;
-    GLMesh* mesh;
+    GLShader* glShader;
+    Mesh mesh;
+    Shader shader;
 
     u32 vao, vbo, ebo;
     
 public:
 
-    OpenGLRenderer(
-        GLShader *gl_shader,
-        GLMesh *gl_mesh
-    );
+    OpenGLRenderer();
 
     void init() override;
     void update() override;
     void draw() override;
     void cleanup() override;
+
+    void createMesh(const Mesh& mesh) override;
+    void createShader(const Shader& Shader) override;
 
 };
 

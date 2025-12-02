@@ -1,14 +1,14 @@
-#ifndef __GL_MESH__
-#define __GL_MESH__
+#ifndef __MESH__
+#define __MESH__
 
-#include "../../../util/Util.h"
+#include "../../util/Util.h"
 
 struct Vertex {
     f32 x, y, z;
     f32 r, g, b;
 };
 
-struct GLMesh{
+struct Mesh{
     std::vector<Vertex> vertices;
     std::vector<u32> indices;
 };
