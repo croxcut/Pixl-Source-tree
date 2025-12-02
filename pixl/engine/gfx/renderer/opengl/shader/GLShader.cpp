@@ -56,6 +56,8 @@ void GLShader::compile(
 }
 
 void GLShader::createProgram() {
+    LOG(INFO, "Creating Program...");
+    
     int success = 0;
     char infoLog[INFO_LOG_BUFFER];
     
@@ -70,6 +72,7 @@ void GLShader::createProgram() {
         glGetProgramInfoLog(programID, 512, NULL, infoLog);
         LOG(ERROR, "Error Linking Shader: %s", infoLog);
     }
+    LOG(INFO, "Program Created");
 }
 
 void GLShader::use() {

@@ -13,11 +13,10 @@ enum Level { INFO, WARN, ERROR, DEBUG};
         const char* prefix = \
             ((lvl) == INFO)  ? "INFO"  : \
             ((lvl) == WARN)  ? "WARN"  : \
-            ((lvl) == DEBUG) ? "DEBUG" : \
                                 "ERROR"; \
         char buffer[1024]; \
         snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
-        std::cout << "[Pixl] " << prefix << " : " << buffer << "\n"; \
+        std::cout << "[Pixl][DEBUG] " << prefix << " : " << buffer << "\n"; \
     } while(0)
 
 #define ASSERT(expr, fmt, ...) \
@@ -25,7 +24,7 @@ enum Level { INFO, WARN, ERROR, DEBUG};
         if (!(expr)) { \
             char buffer[1024]; \
             snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
-            std::cerr << "[Pixl] ASSERT FAILED (" << #expr << ") : " \
+            std::cerr << "[Pixl][ASSERT] ASSERT FAILED (" << #expr << ") : " \
                       << buffer << "\n"; \
             std::abort(); \
         } \

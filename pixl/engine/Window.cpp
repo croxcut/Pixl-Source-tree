@@ -21,7 +21,7 @@ Window::Window(IAppLogic& logic) :
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    handle = glfwCreateWindow(800, 600, "TestWindow", NULL, NULL);
+    handle = glfwCreateWindow(800, 600, "Pixl Engine Test", NULL, NULL);
     if(handle == NULL) {
         // std::cout << "Failed to create Window" << std::endl;
         LOG(ERROR, "Faild to Create Window!");
@@ -92,6 +92,8 @@ void Window::start() {
         glfwSwapBuffers(handle);
         glfwPollEvents();
     }
-    
-    // cleanup();
+
+    cleanup();
+
+    std::cin.get();
 }
