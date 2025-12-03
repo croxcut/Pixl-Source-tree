@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <sstream>
 
-enum Level { INFO, WARN, ERROR, DEBUG };
+enum Level { INFO, WARN, ERROR };
 
 inline std::string currentTime() {
     auto now = std::chrono::system_clock::now();

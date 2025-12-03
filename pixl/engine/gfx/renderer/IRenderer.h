@@ -3,18 +3,12 @@
 
 #include "Mesh.h"
 #include "Shader.h"
+#include "../IAppLogic.h"
 
-class IRenderer{
+class IRenderer : public IAppLogic{
 
 public:
 
-    virtual ~IRenderer() {}
-
-    virtual void init() = 0;
-    virtual void update() = 0;
-    virtual void draw() = 0;
-    virtual void cleanup() = 0;
-    
     // Return IDs for created resources
     virtual std::string createMesh(const Mesh& mesh) = 0;
     virtual std::string createShader(const Shader& shader) = 0;

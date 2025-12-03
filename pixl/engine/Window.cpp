@@ -75,7 +75,7 @@ void Window::_tick() {
 }
 
 void Window::_render() {
-    appLogic.render();
+    appLogic.draw();
 }
 
 void Window::start() {

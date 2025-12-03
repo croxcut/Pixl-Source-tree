@@ -1,8 +1,6 @@
 #ifndef __UTIL__
 #define __UTIL__
 
-#include "stb_image.h"
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 

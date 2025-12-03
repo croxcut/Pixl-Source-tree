@@ -6,6 +6,7 @@
 struct MeshData {
     u32 vao, vbo, ebo;
     u32 indexCount;
+    std::vector<u32> textures;
 };
 
 #endif

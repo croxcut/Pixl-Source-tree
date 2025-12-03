@@ -1,8 +1,8 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "../../pixl/engine/Window.h"
 #include "../../pixl/engine/gfx/renderer/opengl/shader/GLShader.h"
 #include "../../pixl/engine/gfx/renderer/Renderer.h"
-
-#define STB_IMAGE_IMPLEMENTATION
 
 class Zvezda : public IAppLogic {
 
@@ -21,59 +21,40 @@ public:
 
         Mesh squareMesh = {
             {
-                { 0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f},  
-                { 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f},  
-                {-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f},  
-                {-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f},  
+                { 0.5f,  0.5f, 0.0f,    0.0f, 0.0f, 1.0f,   1.0f, 1.0f},  
+                { 0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f},  
+                {-0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   0.0f, 0.0f},  
+                {-0.5f,  0.5f, 0.0f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f},  
             },
             {
                 0, 1, 3,  
                 1, 2, 3   
+            }, 
+            {
+                "res/texture/0x1.jpg"
             }
         };
         squareMeshId = renderer->createMesh(squareMesh);
-
-        Mesh triangleMesh = {
-            {
-                { 0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f},  
-                { 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f},  
-                {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f},  
-            },
-            {
-                0, 1, 2  
-            }
-        };
-        triangleMeshId = renderer->createMesh(triangleMesh);
 
         Shader colorShader = {
             "res/shader/vertex.glsl", 
             "res/shader/fragment.glsl"
         };
         colorShaderId = renderer->createShader(colorShader);
-
-        Shader gradientShader = {
-            "res/shader/vertex.glsl", 
-            "res/shader/fragment.glsl"  
-        };
-        gradientShaderId = renderer->createShader(gradientShader);
         
         renderer->init();
 
     };  
 
     void tick() override {
-        renderer->update();
+        renderer->tick();
     };
 
-    void render() override {
+    void draw() override {
         renderer->useShader(colorShaderId);
-
         renderer->drawMesh(squareMeshId);
-        
-        renderer->useShader(gradientShaderId);
 
-        renderer->drawMesh(triangleMeshId);
-        
+        // renderer->draw();
     };
 
     void cleanup() override {

@@ -1,5 +1,7 @@
 #include "GLShader.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #define INFO_LOG_BUFFER 512
 
 GLShader::GLShader(
@@ -87,11 +89,26 @@ void GLShader::setBool(const std::string &name, bool value) const
 {         
     glUniform1i(glGetUniformLocation(programID, name.c_str()), (int)value); 
 }
+
 void GLShader::setInt(const std::string &name, int value) const
 { 
     glUniform1i(glGetUniformLocation(programID, name.c_str()), value); 
 }
+
 void GLShader::setFloat(const std::string &name, float value) const
 { 
     glUniform1f(glGetUniformLocation(programID, name.c_str()), value); 
 } 
+
+void GLShader::setMat4(const std::string& name, const glm::mat4& mat) const {
+    GLint loc = glGetUniformLocation(programID, name.c_str());
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void GLShader::setVec3(const std::string& name, const glm::vec3& value) const {
+    glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, glm::value_ptr(value));
+}
+
+void GLShader::setVec4(const std::string& name, const glm::vec4& value) const {
+    glUniform4fv(glGetUniformLocation(programID, name.c_str()), 1, glm::value_ptr(value));
+}
