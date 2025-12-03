@@ -1,4 +1,4 @@
-#include "GLShader.h"
+#include "pixl/engine/gfx/shader/GLShader.h"
 
 #include <glm/gtc/type_ptr.hpp>
 

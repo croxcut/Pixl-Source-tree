@@ -1,8 +1,8 @@
 #ifndef __GL_SHADER__
 #define __GL_SHADER__
 
-#include "../../../../util/file/LoadShader.h"
-#include "../../../../util/Util.h"
+#include "../../util/file/LoadShader.h"
+#include "../../util/Util.h"
 #include <glm/glm.hpp>
 
 class GLShader{

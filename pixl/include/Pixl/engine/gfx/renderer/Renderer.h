@@ -15,11 +15,6 @@ class Renderer : public IRenderer {
 
 public:
 
-    // void init() override;
-    // void update() override;
-    // void draw() override;
-    // void cleanup() override;
-
     static IRenderer* getInstance(RendererAPI api) {
         static IRenderer* instance[] = {
             new OpenGLRenderer(),

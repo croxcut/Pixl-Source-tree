@@ -1,10 +1,10 @@
 #ifndef __WINDOW__
 #define __WINDOW__
 
-#include "util/Util.h"
 
-#include "gfx/IAppLogic.h"
-#include "util/Log.h"
+#include "../core/IAppLogic.h"
+#include "../util/Log.h"
+#include "../util/Util.h"
 
 class Window{
 

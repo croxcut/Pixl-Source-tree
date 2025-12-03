@@ -3,7 +3,7 @@
 
 #include "Mesh.h"
 #include "Shader.h"
-#include "../IAppLogic.h"
+#include "../../core/IAppLogic.h"
 
 class IRenderer : public IAppLogic{
 

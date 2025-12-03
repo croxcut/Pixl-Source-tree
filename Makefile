@@ -1,41 +1,51 @@
 CXX = g++
-CFLAGS = -g --std=c++17 -static -O2
+CFLAGS = -g -std=c++17 -O2
 
 # Directories
+ENGINE_DIR = pixl
 GAME_DIR = game
-SRC_DIR = pixl
+BUILD_DIR = game
+
+# Dependencies
 GLAD_DIR = dependencies/GLAD
 GLFW_DIR = dependencies/GLFW
 GLM_DIR = dependencies/GLM
-BUILD_DIR = $(GAME_DIR)
 
-# Include paths
-INCLUDES = -I$(GLFW_DIR)/include \
+# Includes
+INCLUDES = -I$(ENGINE_DIR)/include \
+           -I$(GLFW_DIR)/include \
            -I$(GLAD_DIR)/include \
            -I$(GLM_DIR)
 
-# Source files
-SOURCES = $(GAME_DIR)/src/main.cpp \
-          $(SRC_DIR)/engine/Window.cpp \
-          $(SRC_DIR)/engine/gfx/renderer/opengl/*.cpp \
-          $(SRC_DIR)/engine/gfx/renderer/opengl/shader/*.cpp \
-          $(GLAD_DIR)/src/glad.c 
+# Source files (wildcards)
+ENGINE_SRC = $(wildcard $(ENGINE_DIR)/src/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/src/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/src/*/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/src/*/*/*/*.cpp) \
+
+GAME_SRC = $(wildcard $(GAME_DIR)/src/*.cpp)
+
+GLAD_SRC = $(GLAD_DIR)/src/glad.c
+
+SOURCES = $(ENGINE_SRC) $(GAME_SRC) $(GLAD_SRC)
 
 # Output binary
 OUTPUT = $(BUILD_DIR)/main.exe
 
-# Linker libraries
-LIBS = -lopengl32 -L$(GLFW_DIR)/lib-mingw -lglfw3dll
+# Libraries
+LIBS = -lopengl32 -L$(GLFW_DIR)/lib-mingw -lglfw3 -lgdi32 -luser32 -lkernel32 -lshell32
 
-# Default build target
+# Default build
 all: $(OUTPUT)
 
-# Run Target :)
-run: all
-	./builds/windows/main.exe
-
 $(OUTPUT): $(SOURCES)
-	@mkdir -p $(BUILD_DIR)
+	@mkdir $(BUILD_DIR) 2>nul || true
 	$(CXX) $(CFLAGS) $(INCLUDES) $^ -o $@ $(LIBS)
 
-.PHONY: all clean
+# Run the program
+run: all
+	$(OUTPUT)
+
+# Clean build
+clean:
+	rm -rf $(BUILD_DIR)/main.exe

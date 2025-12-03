@@ -2,7 +2,7 @@
 #define __OPENGL_RENDERER__
 
 #include "../IRenderer.h"
-#include "shader/GLShader.h"
+#include "../../shader/GLShader.h"
 #include "../../../util/Log.h"
 #include "../MeshData.h"
 #include "../../../util/stb_image.h"

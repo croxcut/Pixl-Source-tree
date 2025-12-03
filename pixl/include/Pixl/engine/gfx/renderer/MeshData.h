@@ -1,7 +1,7 @@
 #ifndef __MESH_DATA__
 #define __MESH_DATA__
 
-#include "../../util/Types.h"
+#include "../../util/Util.h"
 
 struct MeshData {
     u32 vao, vbo, ebo;

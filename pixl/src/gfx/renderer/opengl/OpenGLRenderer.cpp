@@ -1,4 +1,4 @@
-#include "OpenGLRenderer.h"
+#include "pixl/engine/gfx/renderer/opengl/OpenGLRenderer.h"
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 

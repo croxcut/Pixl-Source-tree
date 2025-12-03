@@ -1,8 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 
-#include "../../pixl/engine/Window.h"
-#include "../../pixl/engine/gfx/renderer/opengl/shader/GLShader.h"
-#include "../../pixl/engine/gfx/renderer/Renderer.h"
+#include <pixl/engine/gfx/Window.h>
+#include <pixl/engine/core/IAppLogic.h>
+#include <pixl/engine/gfx/renderer/Renderer.h>
 
 class Zvezda : public IAppLogic {
 
