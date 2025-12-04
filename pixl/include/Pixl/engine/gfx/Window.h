@@ -1,6 +1,7 @@
 #ifndef __WINDOW__
 #define __WINDOW__
 
+#define STB_IMAGE_IMPLEMENTATION
 
 #include "../core/IAppLogic.h"
 #include "../util/Log.h"
