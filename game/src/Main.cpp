@@ -2,9 +2,16 @@
 #include <pixl/engine/gfx/Window.h>
 #include <pixl/engine/gfx/renderer/Renderer.h>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 class Zvezda : public IAppLogic {
 
 private:
+
+    Assimp::Importer importer;
+
     IRenderer* renderer = nullptr;
     
     std::string squareMeshId;
@@ -41,7 +48,7 @@ public:
         colorShaderId = renderer->createShader(colorShader);
         
         renderer->init();
-
+        
     };  
 
     void tick() override {
@@ -49,10 +56,19 @@ public:
     };
 
     void draw() override {
-        renderer->useShader(colorShaderId);
-        renderer->drawMesh(squareMeshId);
 
-        // renderer->draw();
+        float scale = 1.2f;
+
+        float time = glfwGetTime();
+        float rotation = time * 5.0f;
+
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::rotate(transform, glm::radians(rotation), glm::vec3(0.0, 0.0, 1.0));
+        transform = glm::scale(transform, glm::vec3(scale, scale, scale));
+
+        renderer->submitDrawCall(squareMeshId, colorShaderId, transform);
+
+        renderer->draw();  
     };
 
     void cleanup() override {

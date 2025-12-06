@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <algorithm>
+
 OpenGLRenderer::OpenGLRenderer() {
     stbi_set_flip_vertically_on_load(true); 
 }
@@ -27,7 +29,7 @@ std::string OpenGLRenderer::createMesh(const Mesh& mesh) {
             continue;
         }
 
-        GLuint texId;
+        u32 texId;
         glGenTextures(1, &texId);
         glBindTexture(GL_TEXTURE_2D, texId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -35,7 +37,7 @@ std::string OpenGLRenderer::createMesh(const Mesh& mesh) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        u32 format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -121,11 +123,26 @@ void OpenGLRenderer::submitDrawCall(const std::string& meshId, const std::string
 }
 
 void OpenGLRenderer::draw() {
+
+    if (drawQueue.empty()) return;
+
+    // Reset cached state
     boundVAO = 0;
     boundTextures.clear();
     currentShader.clear();
 
+    // --- NEW: Sort by shaderId AND meshId ---
+    std::sort(drawQueue.begin(), drawQueue.end(),
+        [](const DrawCall& a, const DrawCall& b) {
+            if (a.shaderId == b.shaderId)
+                return a.meshId < b.meshId;
+            return a.shaderId < b.shaderId;
+        }
+    );
+
+    // Render sorted draw calls
     for (const auto& call : drawQueue) {
+
         auto meshIt = meshes.find(call.meshId);
         auto shaderIt = shaders.find(call.shaderId);
         if (meshIt == meshes.end() || shaderIt == shaders.end()) continue;
@@ -135,7 +152,7 @@ void OpenGLRenderer::draw() {
 
         useShader(call.shaderId);
 
-        shader->setMat4("model", call.transform);
+        shader->setMat4("transform", call.transform);
 
         drawMesh(call.meshId);
     }

@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CFLAGS = -g -std=c++17 -O0
+CFLAGS = -g -std=c++17 -O0 
 
 # Directories
 ENGINE_DIR = pixl
@@ -12,11 +12,15 @@ OBJ_DIR = $(BUILD_DIR)/obj
 GLAD_DIR = dependencies/GLAD
 GLFW_DIR = dependencies/GLFW
 GLM_DIR = dependencies/GLM
+JSON_DIR = dependencies/JSON
+ASSIMP_DIR = dependencies/ASSIMP
 
 # Includes
 INCLUDES = -I$(ENGINE_DIR)/include \
            -I$(GLFW_DIR)/include \
            -I$(GLAD_DIR)/include \
+           -I$(JSON_DIR)/include \
+           -I$(ASSIMP_DIR)/include \
            -I$(GLM_DIR)
 
 # Source files
@@ -39,7 +43,9 @@ OBJECTS = $(ENGINE_OBJ) $(GAME_OBJ) $(GLAD_OBJ)
 OUTPUT = $(BUILD_DIR)/main.exe
 
 # Libraries
-LIBS = -lopengl32 -L$(GLFW_DIR)/lib-mingw -lglfw3 -lgdi32 -luser32 -lkernel32 -lshell32
+LIBS = -lopengl32 -L$(GLFW_DIR)/lib-mingw -lglfw3 \
+       -lgdi32 -luser32 -lkernel32 -lshell32 \
+       -L$(ASSIMP_DIR)/lib -lassimp
 
 # Default build
 all: $(OUTPUT)
@@ -48,6 +54,7 @@ all: $(OUTPUT)
 $(OUTPUT): $(OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $^ -o $@ $(LIBS)
+	cp $(ASSIMP_DIR)/bin/libassimp-6.dll $(BUILD_DIR)/
 
 # Compile C++ engine files
 $(OBJ_DIR)/engine/%.o: $(ENGINE_DIR)/%.cpp

@@ -49,7 +49,7 @@ public:
     void useShader(const std::string& shaderId) override;
     void drawMesh(const std::string& meshId) override;
 
-    void submitDrawCall(const std::string& meshId, const std::string& shaderId, const glm::mat4& transform = glm::mat4(1.0f));
+    void submitDrawCall(const std::string& meshId, const std::string& shaderId, const glm::mat4& transform = glm::mat4(1.0f)) override;
 };
 
 #endif

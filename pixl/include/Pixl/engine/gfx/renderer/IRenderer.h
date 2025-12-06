@@ -17,6 +17,8 @@ public:
     virtual void useShader(const std::string& shaderId) = 0;
     virtual void drawMesh(const std::string& meshId) = 0;
 
+    virtual void submitDrawCall(const std::string& meshId, const std::string& shaderId, const glm::mat4& transform = glm::mat4(1.0f)) = 0;
+
 };
 
 #endif
