@@ -3,11 +3,19 @@
 
 #include "Mesh.h"
 #include "Shader.h"
-#include "../../core/IAppLogic.h"
+#include <glm/glm.hpp>
+#include <string>
 
-class IRenderer : public IAppLogic{
+class IRenderer {
 
 public:
+
+    virtual ~IRenderer() = default;
+
+    virtual void init() = 0;
+    virtual void tick() = 0;
+    virtual void draw() = 0;
+    virtual void cleanup() = 0;
 
     // Return IDs for created resources
     virtual std::string createMesh(const Mesh& mesh) = 0;

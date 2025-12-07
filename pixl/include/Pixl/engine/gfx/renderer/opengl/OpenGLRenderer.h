@@ -1,6 +1,8 @@
 #ifndef __OPENGL_RENDERER__
 #define __OPENGL_RENDERER__
 
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "../IRenderer.h"
 #include "../../shader/GLShader.h"
 #include "../../../util/Log.h"
@@ -17,7 +19,7 @@ class OpenGLRenderer : public IRenderer {
 private:
     std::unordered_map<std::string, GLShader*> shaders;
     std::unordered_map<std::string, MeshData> meshes;
-
+    
     std::string currentShader;
     GLuint boundVAO = 0;
     std::vector<GLuint> boundTextures;
