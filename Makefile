@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CFLAGS = -g -std=c++17 -O0
+CFLAGS = -g -std=c++17 -O2
 
 # Directories
 ENGINE_DIR = pixl

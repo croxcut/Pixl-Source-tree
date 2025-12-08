@@ -1,8 +1,6 @@
 #ifndef __OPENGL_RENDERER__
 #define __OPENGL_RENDERER__
 
-#define STB_IMAGE_IMPLEMENTATION
-
 #include "../IRenderer.h"
 #include "../../shader/GLShader.h"
 #include "../../../util/Log.h"
