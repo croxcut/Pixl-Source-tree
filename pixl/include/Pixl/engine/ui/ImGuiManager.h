@@ -1,56 +1,76 @@
 #ifndef __IMGUI_MANAGER__
 #define __IMGUI_MANAGER__
 
+#include <GLFW/glfw3.h>
+
+#include "../core/Flow.h"
+#include "../util/Log.h"
+
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <GLFW/glfw3.h>
+#include <imgui_internal.h>
 
-class ImGuiManager {
-private:
-    GLFWwindow* window;
+#include <filesystem>
+#include <vector>
+#include <string>
+
+#ifdef _WIN32
+#include <windows.h>
+#elif __linux__
+#include <unistd.h>
+#include <limits.h>
+#elif __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
+namespace fs = std::filesystem;
+
+inline std::string getExeFolder() {
+#ifdef _WIN32
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    return fs::canonical(buffer).parent_path().string();
+#elif __linux__
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    if (count != -1) return fs::canonical(std::string(result, count)).parent_path().string();
+    return fs::current_path().string();
+#elif __APPLE__
+    char buffer[1024];
+    uint32_t size = sizeof(buffer);
+    if (_NSGetExecutablePath(buffer, &size) == 0)
+        return fs::canonical(buffer).parent_path().string();
+    return fs::current_path().string();
+#else
+    return fs::current_path().string();
+#endif
+}
+
+class ImGuiManager : Flow{
+
+// ---- Variables ----
 public:
-    ImGuiManager(GLFWwindow* win) : window(win) {}
+    GLFWwindow* _windowHandle = nullptr;    
+
+private:
+
+// ---- Functions ----
+public:
+    ImGuiManager(GLFWwindow* windowHandle) : _windowHandle(windowHandle) {}
+
+    void init() override;
+    void tick() override;
+    void render() override;
+    void cleanup() override;
+
+    void startFrame(); 
+    void endFrame();
+
+private:
+
+    ImGuiManager() = default;
     
-    void init() {
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;   // Keyboard controls
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;       // Enable Docking
-
-        // Initialize GLFW + OpenGL3 backends
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 460");
-    }
-
-    void startFrame() {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    }
-
-    void endFrame() {
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-            if (io.BackendFlags & ImGuiBackendFlags_HasViewports) {
-                GLFWwindow* backup_context = glfwGetCurrentContext();
-                ImGui::UpdatePlatformWindows();
-                ImGui::RenderPlatformWindowsDefault();
-                glfwMakeContextCurrent(backup_context);
-            }
-        }
-    }
-
-    void cleanup() {
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-    }
 };
 
 #endif

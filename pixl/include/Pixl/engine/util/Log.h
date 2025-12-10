@@ -49,7 +49,7 @@ inline std::string currentTime() {
         if (!(expr)) { \
             char buffer[1024]; \
             snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
-            std::cerr << "[PIXL][ASSERT][" << currentTime() << "] ASSERT FAILED (" << #expr << ") : " \
+            std::cerr << "[PIXL][ASSERT][" << currentTime() << "] ASSERTION FAILED (" << #expr << ") : " \
                       << buffer << "\n"; \
             std::abort(); \
         } \

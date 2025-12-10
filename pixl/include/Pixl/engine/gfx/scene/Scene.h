@@ -1,9 +1,14 @@
 #ifndef __SCENE__
 #define __SCENE__
 
-#include "../../core/IAppLogic.h"
+// #include "../../core/IAppLogic.h"
+#include "../../core/Flow.h"
 
-class Scene : public IAppLogic{
+/*
+    Abstract Scene
+*/
+class Scene : public Flow{
+
 
 
 };

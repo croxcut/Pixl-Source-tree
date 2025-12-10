@@ -1,10 +1,6 @@
 #include <pixl/engine/gfx/Window.h>
 #include <pixl/engine/gfx/renderer/Renderer.h>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,12 +8,17 @@
 #include <string>
 #include <vector>
 
+#include "scene/MainScene.h"
+
+/*
+    TODO: 
+        -Re-factor Window Class
+        -Fix Gui
+*/
+
 class Zvezda : public IAppLogic {
 
 private:
-
-    Assimp::Importer importer;
-
     IRenderer* renderer = nullptr;
     
     std::string squareMeshId;
@@ -51,7 +52,7 @@ public:
                 1, 2, 3
             },
             {
-                "res/texture/0x1.jpg"
+                "res/texture/0x1.jpg",
             }
         };
 

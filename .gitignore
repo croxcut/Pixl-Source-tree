@@ -1,10 +1,1 @@
-# Ignore all executables.
-/builds/linux/*.exe
-<<<<<<< HEAD
-/builds/windows/*.exe
-
-build/
-=======
-/builds/windows/*.exe
->>>>>>> 13a5a64290be813def5b666a1231ce63209dcda8
-git add .
+./build
