@@ -5,6 +5,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "Flow.h"
+
 struct SceneObject {
     std::string meshId;
     glm::vec3 position {0.0f, 0.0f, 0.0f};
@@ -12,7 +14,7 @@ struct SceneObject {
     glm::vec3 scale    {1.0f, 1.0f, 1.0f};
 };
 
-class IAppLogic {
+class IAppLogic{
 
 public:
     virtual ~IAppLogic() = default;
@@ -21,9 +23,6 @@ public:
     virtual void tick() = 0;
     virtual void draw() = 0;
     virtual void cleanup() = 0;
-
-    virtual std::vector<SceneObject>& getSceneObjects() = 0;
-    virtual int& getSelectedObjectIndex() = 0;
 };
 
 #endif

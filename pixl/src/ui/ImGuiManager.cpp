@@ -40,7 +40,7 @@ void ImGuiManager::tick() {
     
 }
 
-void ImGuiManager::render() {
+void ImGuiManager::draw() {
     
 }
 

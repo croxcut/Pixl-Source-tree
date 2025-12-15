@@ -6,24 +6,26 @@
 #include <glm/glm.hpp>
 #include <string>
 
-class IRenderer {
+#include "../../core/Flow.h"
+
+class IRenderer : public Flow{
 
 public:
-
     virtual ~IRenderer() = default;
 
-    virtual void init() = 0;
-    virtual void tick() = 0;
-    virtual void draw() = 0;
-    virtual void cleanup() = 0;
+    // virtual std::string createMesh(const Mesh& mesh) = 0;
+    // virtual std::string createShader(const Shader& shader) = 0;
 
-    virtual std::string createMesh(const Mesh& mesh) = 0;
-    virtual std::string createShader(const Shader& shader) = 0;
-    
-    virtual void useShader(const std::string& shaderId) = 0;
-    virtual void drawMesh(const std::string& meshId) = 0;
+    // virtual void useShader(const std::string& shaderId) = 0;
+    // virtual void drawMesh(const std::string& meshId) = 0;
 
-    virtual void submitDrawCall(const std::string& meshId, const std::string& shaderId, const glm::mat4& transform = glm::mat4(1.0f)) = 0;
+    virtual u64 createMesh(const Mesh& mesh) = 0;
+    virtual u64 createShader(const Shader& shader) = 0;
+
+    virtual void drawMesh(const u64& meshId) = 0;
+    virtual void useShader(const u64& shaderId) = 0;
+
+    virtual void submitDrawCall(const u64& meshId, const u64& shaderId, const glm::mat4& transform = glm::mat4(1.0f)) = 0;
 
 };
 

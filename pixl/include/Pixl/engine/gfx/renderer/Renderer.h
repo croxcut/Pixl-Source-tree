@@ -2,7 +2,7 @@
 #define __RENDERER__
 
 #include "IRenderer.h"
-#include "opengl/OpenGLRenderer.h"
+#include "opengl/opengl.h"
 #include "../../util/Util.h"
 
 enum RendererAPI{
@@ -17,7 +17,7 @@ public:
 
     static IRenderer* getInstance(RendererAPI api) {
         static IRenderer* instance[] = {
-            new OpenGLRenderer(),
+            new OpenGL(),
             nullptr,
             nullptr
         };

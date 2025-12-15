@@ -206,98 +206,83 @@ void Window::_tick() {
 
     if (showSceneWindow) {
         ImGui::Begin("Scene", &showSceneWindow);
-        auto& objs = appLogic.getSceneObjects();
-        int& selectedIndex = appLogic.getSelectedObjectIndex();
-
-        if (objs.empty()) ImGui::Text("No objects in scene");
-        else {
-            ImGui::Text("Scene Objects:");
-            ImGui::Separator();
-            ImGui::BeginChild("SceneList", ImVec2(0,0), false);
-            for (int i = 0; i < (int)objs.size(); ++i) {
-                bool isSelected = (selectedIndex == i);
-                if (ImGui::Selectable(objs[i].meshId.c_str(), isSelected))
-                    selectedIndex = i;
-            }
-            ImGui::EndChild();
-        }
 
         ImGui::End();
     }
 
     if (showPropertiesWindow) {
         ImGui::Begin("Properties", &showPropertiesWindow);
-        auto& objs = appLogic.getSceneObjects();
-        int& selectedIndex = appLogic.getSelectedObjectIndex();
+        // auto& objs = appLogic.getSceneObjects();
+        // int& selectedIndex = appLogic.getSelectedObjectIndex();
 
-        if (selectedIndex >= 0 && selectedIndex < (int)objs.size()) {
-            auto& obj = objs[selectedIndex];
-            ImGui::Text("Selected: %s", obj.meshId.c_str());
+        // if (selectedIndex >= 0 && selectedIndex < (int)objs.size()) {
+        //     auto& obj = objs[selectedIndex];
+        //     ImGui::Text("Selected: %s", obj.meshId.c_str());
 
-            auto float3WithSingleIncDec = [](const char* label, glm::vec3& value, float step = 0.05f) {
-                ImGui::Text("%s", label);
-                ImGui::SameLine(100);
+        //     auto float3WithSingleIncDec = [](const char* label, glm::vec3& value, float step = 0.05f) {
+        //         ImGui::Text("%s", label);
+        //         ImGui::SameLine(100);
 
-                const char* axes[3] = { "X", "Y", "Z" };
-                for (int i = 0; i < 3; ++i) {
-                    ImGui::PushID(label);
-                    ImGui::PushID(i);
+        //         const char* axes[3] = { "X", "Y", "Z" };
+        //         for (int i = 0; i < 3; ++i) {
+        //             ImGui::PushID(label);
+        //             ImGui::PushID(i);
 
-                    ImGui::BeginGroup();
+        //             ImGui::BeginGroup();
 
-                    ImGui::PushItemWidth(60);
-                    ImGui::InputFloat("##value", &value[i], 0.0f, 0.0f, "%.3f");
-                    ImGui::PopItemWidth();
+        //             ImGui::PushItemWidth(60);
+        //             ImGui::InputFloat("##value", &value[i], 0.0f, 0.0f, "%.3f");
+        //             ImGui::PopItemWidth();
 
-                    ImVec2 btnSize(18.0f, ImGui::GetItemRectSize().y);
-                    ImGui::SameLine(0, 0);
-                    if (ImGui::InvisibleButton("##incdec", btnSize)) {
-                        ImVec2 mousePos = ImGui::GetMousePos();
-                        ImVec2 btnMin = ImGui::GetItemRectMin();
-                        float halfY = btnSize.y * 0.5f;
-                        if (mousePos.y < btnMin.y + halfY) value[i] += step;
-                        else value[i] -= step;
-                    }
+        //             ImVec2 btnSize(18.0f, ImGui::GetItemRectSize().y);
+        //             ImGui::SameLine(0, 0);
+        //             if (ImGui::InvisibleButton("##incdec", btnSize)) {
+        //                 ImVec2 mousePos = ImGui::GetMousePos();
+        //                 ImVec2 btnMin = ImGui::GetItemRectMin();
+        //                 float halfY = btnSize.y * 0.5f;
+        //                 if (mousePos.y < btnMin.y + halfY) value[i] += step;
+        //                 else value[i] -= step;
+        //             }
 
-                    ImDrawList* draw = ImGui::GetWindowDrawList();
-                    ImVec2 btnMin = ImGui::GetItemRectMin();
-                    ImVec2 btnMax = ImGui::GetItemRectMax();
+        //             ImDrawList* draw = ImGui::GetWindowDrawList();
+        //             ImVec2 btnMin = ImGui::GetItemRectMin();
+        //             ImVec2 btnMax = ImGui::GetItemRectMax();
 
-                    float centerX = (btnMin.x + btnMax.x) * 0.5f;
-                    float btnHeight = btnMax.y - btnMin.y;
-                    float quarterH = btnHeight * 0.25f;
-                    float s = 3.0f; 
+        //             float centerX = (btnMin.x + btnMax.x) * 0.5f;
+        //             float btnHeight = btnMax.y - btnMin.y;
+        //             float quarterH = btnHeight * 0.25f;
+        //             float s = 3.0f; 
 
-                    draw->AddTriangleFilled(
-                        ImVec2(centerX - s, btnMin.y + quarterH + s),
-                        ImVec2(centerX + s, btnMin.y + quarterH + s),
-                        ImVec2(centerX,     btnMin.y + quarterH - s),
-                        IM_COL32(255, 255, 255, 255)
-                    );
+        //             draw->AddTriangleFilled(
+        //                 ImVec2(centerX - s, btnMin.y + quarterH + s),
+        //                 ImVec2(centerX + s, btnMin.y + quarterH + s),
+        //                 ImVec2(centerX,     btnMin.y + quarterH - s),
+        //                 IM_COL32(255, 255, 255, 255)
+        //             );
 
-                    draw->AddTriangleFilled(
-                        ImVec2(centerX - s, btnMin.y + 3 * quarterH - s),
-                        ImVec2(centerX + s, btnMin.y + 3 * quarterH - s),
-                        ImVec2(centerX,     btnMin.y + 3 * quarterH + s),
-                        IM_COL32(255, 255, 255, 255)
-                    );
+        //             draw->AddTriangleFilled(
+        //                 ImVec2(centerX - s, btnMin.y + 3 * quarterH - s),
+        //                 ImVec2(centerX + s, btnMin.y + 3 * quarterH - s),
+        //                 ImVec2(centerX,     btnMin.y + 3 * quarterH + s),
+        //                 IM_COL32(255, 255, 255, 255)
+        //             );
 
-                    ImGui::EndGroup();
+        //             ImGui::EndGroup();
 
-                    if (i < 2) ImGui::SameLine(0, 10);
+        //             if (i < 2) ImGui::SameLine(0, 10);
 
-                    ImGui::PopID();
-                    ImGui::PopID();
-                }
-            };
+        //             ImGui::PopID();
+        //             ImGui::PopID();
+        //         }
+        //     };
 
-            float3WithSingleIncDec("Position", obj.position, 0.05f);
-            float3WithSingleIncDec("Rotation", obj.rotation, 1.0f);
-            float3WithSingleIncDec("Scale", obj.scale, 0.05f);
+        //     float3WithSingleIncDec("Position", obj.position, 0.05f);
+        //     float3WithSingleIncDec("Rotation", obj.rotation, 1.0f);
+        //     float3WithSingleIncDec("Scale", obj.scale, 0.05f);
 
-        } else {
-            ImGui::Text("No object selected");
-        }
+        // } else {
+        //     ImGui::Text("No object selected");
+        // }
 
         ImGui::End();
     }

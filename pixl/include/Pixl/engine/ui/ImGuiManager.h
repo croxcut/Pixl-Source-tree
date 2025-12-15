@@ -61,7 +61,7 @@ public:
 
     void init() override;
     void tick() override;
-    void render() override;
+    void draw() override;
     void cleanup() override;
 
     void startFrame(); 

@@ -3,11 +3,11 @@
 
 #include <pixl/engine/gfx/scene/Scene.h>
 
-class MainScene : Scene {
+class MainScene : public Scene {
 
     void init() override;
     void tick() override;
-    void render() override;
+    void draw() override;
     void cleanup() override;
 
 };
