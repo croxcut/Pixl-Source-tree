@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 
 #include "../IRenderer.h"
-#include "../../shader/GLShader.h"
+#include "../../shader/glshader.h"
 #include "../../../util/Log.h"
 #include "../MeshData.h"
 #include "../../../util/stb_image.h"

@@ -12,6 +12,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+struct EngineTiming {
+    bool vsync = false;
+    bool capFPS = false;
+    int maxFPS = 144;
+
+    bool fixedTick = true;
+    double tickRate = 20.0; 
+};
+
 class Window {
 private:
     GLFWwindow* handle;
@@ -27,6 +36,15 @@ private:
     GLuint gameDepthRBO = 0;
     int fboWidth = 1280;
     int fboHeight = 720;
+
+    EngineTiming timing;
+
+    double lastTime = 0.0;
+    double lastFPSTime = 0.0;
+    int frameCount = 0;
+    int tickCount = 0;
+    float fps = 0.0f;
+    float tps = 0.0f;
 
     bool showSceneWindow = true;
     bool showPropertiesWindow = true;

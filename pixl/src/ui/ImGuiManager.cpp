@@ -11,6 +11,12 @@ void ImGuiManager::init() {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+    // Make sure window handle is valid
+    if (!_windowHandle) {
+        LOG(ERROR, "ImGuiManager init failed: invalid GLFW window handle!");
+        return;
+    }
+
     ImGui_ImplGlfw_InitForOpenGL(_windowHandle, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
@@ -18,6 +24,9 @@ void ImGuiManager::init() {
 }
 
 void ImGuiManager::startFrame() {
+    // Ensure context is current
+    if (!_windowHandle) return;
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -36,14 +45,6 @@ void ImGuiManager::endFrame() {
     }
 }
 
-void ImGuiManager::tick() {
-    
-}
-
-void ImGuiManager::draw() {
-    
-}
-
 void ImGuiManager::cleanup() {
     LOG(INFO, "GUI MANAGER RESOURCE CLEANUP!...");
 
@@ -53,3 +54,12 @@ void ImGuiManager::cleanup() {
 
     LOG(INFO, "GUI MANAGER RESOURCES FREED!");
 }
+
+void ImGuiManager::tick() {
+    
+}
+
+void ImGuiManager::draw() {
+    
+}
+

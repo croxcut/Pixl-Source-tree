@@ -2,6 +2,7 @@
 
 #include "pixl/engine/gfx/renderer/opengl/opengl.h"
 
+
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -176,5 +177,4 @@ void OpenGL::cleanup() {
         }
     }
     meshes.clear();
-
 }

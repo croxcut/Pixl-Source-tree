@@ -1,4 +1,4 @@
-#include "pixl/engine/gfx/shader/GLShader.h"
+#include "pixl/engine/gfx/shader/glshader.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -33,7 +33,8 @@ void GLShader::createShader(
     u32 *shader, 
     GLuint shaderType
 ) {
-    LOG(INFO, "Creating Shader... %s", shaderSource);
+    LOG(INFO, "Creating Shader...");
+    LOG(INFO, "Shader: \n%s", shaderSource);
     *shader = glCreateShader(shaderType);
     glShaderSource(*shader, 1, &shaderSource, NULL);
     compile(shader);

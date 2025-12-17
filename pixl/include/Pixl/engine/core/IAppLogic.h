@@ -5,24 +5,20 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "Flow.h"
+#include "flow.h"
+#include "../util/types.h"
 
 struct SceneObject {
-    std::string meshId;
+    u64 meshId;
     glm::vec3 position {0.0f, 0.0f, 0.0f};
     glm::vec3 rotation {0.0f, 0.0f, 0.0f}; 
     glm::vec3 scale    {1.0f, 1.0f, 1.0f};
 };
 
-class IAppLogic{
+class IAppLogic : public Flow{
 
 public:
     virtual ~IAppLogic() = default;
-
-    virtual void init() = 0;
-    virtual void tick() = 0;
-    virtual void draw() = 0;
-    virtual void cleanup() = 0;
 };
 
 #endif

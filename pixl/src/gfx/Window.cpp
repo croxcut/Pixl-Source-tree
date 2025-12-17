@@ -1,5 +1,6 @@
 #include "pixl/engine/gfx/Window.h"
 #include <iostream>
+#include <thread>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -34,14 +35,15 @@ Window::Window(IAppLogic& logic) : appLogic(logic) {
 
     glViewport(0, 0, fboWidth, fboHeight);
     glfwSetFramebufferSizeCallback(handle, framebuffer_size_callback);
-    glfwSwapInterval(0);
+
+    glfwSwapInterval(timing.vsync ? 1 : 0);
 
     glEnable(GL_DEPTH_TEST);
     LOG(INFO, "Window created successfully!");
 }
 
 Window::~Window() {
-cleanup();
+    cleanup();
 }
 
 void Window::initFBO() {
@@ -113,6 +115,9 @@ void Window::setupDocking() {
     ImGui::Begin("DockspaceWindow", nullptr, window_flags);
 
     if (ImGui::BeginMenuBar()) {
+        // --------------------
+        // Main Menu Items
+        // --------------------
         if (ImGui::BeginMenu("Widgets")) {
             ImGui::MenuItem("Scene", nullptr, &showSceneWindow);
             ImGui::MenuItem("Properties", nullptr, &showPropertiesWindow);
@@ -123,6 +128,24 @@ void Window::setupDocking() {
             ImGui::MenuItem("FPS Viewer", nullptr, &showFPSViewer);
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Performance")) {
+            ImGui::Checkbox("VSync", &timing.vsync);
+
+            // Replace sliders with input fields
+            ImGui::InputInt("Max FPS", &timing.maxFPS);
+            ImGui::InputFloat("Tick Rate", (float*)&timing.tickRate);
+            ImGui::Checkbox("Cap FPS", &timing.capFPS);
+            ImGui::Checkbox("Fixed Tick", &timing.fixedTick);
+            ImGui::EndMenu();
+        }
+        {
+            ImGuiStyle& style = ImGui::GetStyle();
+            float windowWidth = ImGui::GetWindowWidth();
+            float textWidth = ImGui::CalcTextSize("FPS: 000 | TPS: 000").x; // approximate width
+            ImGui::SameLine(windowWidth - textWidth - style.FramePadding.x * 2);
+            ImGui::Text("FPS: %d | TPS: %d", (int)fps, (int)tps + 1);            
+        }
+
         ImGui::EndMenuBar();
     }
 
@@ -163,23 +186,39 @@ void Window::_init() {
     imgui->init();
     initFBO();
     refreshFolders();
+    lastFPSTime = glfwGetTime();
+    frameCount = 0;
+    tickCount = 0;
+    fps = 0.0f;
+    tps = 0.0f;
 }
 
 void Window::_tick() {
-    float currentFrame = (float)glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;
+    static bool lastVsync = timing.vsync;
+    if (lastVsync != timing.vsync) {
+        glfwSwapInterval(timing.vsync ? 1 : 0);
+        lastVsync = timing.vsync;
+    }
 
-    appLogic.tick();
+    appLogic.tick(); // FIXED RATE GAME LOGIC
+    tickCount++;
+}
+
+void Window::_render() {
     imgui->startFrame();
 
-    setupDocking(); 
+    setupDocking();
 
+    // --------------------
+    // GAME WINDOW
+    // --------------------
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin("Game");
+
     ImVec2 gamePanelSize = ImGui::GetContentRegionAvail();
     int newWidth = (int)gamePanelSize.x;
     int newHeight = (int)gamePanelSize.y;
+
     if (newWidth != fboWidth || newHeight != fboHeight)
         resizeFBO(newWidth, newHeight);
 
@@ -187,103 +226,31 @@ void Window::_tick() {
     glViewport(0, 0, fboWidth, fboHeight);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     appLogic.draw();
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    ImGui::Image((void*)(intptr_t)gameColorTex, gamePanelSize, ImVec2(0,1), ImVec2(1,0));
-
-    if (showFPSViewer) {
-        char fpsText[32];
-        snprintf(fpsText, sizeof(fpsText), "FPS: %.1f", 1.0f / deltaTime);
-        ImVec2 textSize = ImGui::CalcTextSize(fpsText);
-        ImGui::SetCursorPos(ImVec2(gamePanelSize.x - textSize.x,
-                                    gamePanelSize.y - textSize.y));
-        ImGui::Text("%s", fpsText);
-    }
+    ImGui::Image(
+        (void*)(intptr_t)gameColorTex,
+        gamePanelSize,
+        ImVec2(0, 1),
+        ImVec2(1, 0)
+    );
 
     ImGui::End();
     ImGui::PopStyleVar();
 
+    // --------------------
+    // OPTIONAL WINDOWS
+    // --------------------
     if (showSceneWindow) {
         ImGui::Begin("Scene", &showSceneWindow);
-
         ImGui::End();
     }
 
     if (showPropertiesWindow) {
         ImGui::Begin("Properties", &showPropertiesWindow);
-        // auto& objs = appLogic.getSceneObjects();
-        // int& selectedIndex = appLogic.getSelectedObjectIndex();
-
-        // if (selectedIndex >= 0 && selectedIndex < (int)objs.size()) {
-        //     auto& obj = objs[selectedIndex];
-        //     ImGui::Text("Selected: %s", obj.meshId.c_str());
-
-        //     auto float3WithSingleIncDec = [](const char* label, glm::vec3& value, float step = 0.05f) {
-        //         ImGui::Text("%s", label);
-        //         ImGui::SameLine(100);
-
-        //         const char* axes[3] = { "X", "Y", "Z" };
-        //         for (int i = 0; i < 3; ++i) {
-        //             ImGui::PushID(label);
-        //             ImGui::PushID(i);
-
-        //             ImGui::BeginGroup();
-
-        //             ImGui::PushItemWidth(60);
-        //             ImGui::InputFloat("##value", &value[i], 0.0f, 0.0f, "%.3f");
-        //             ImGui::PopItemWidth();
-
-        //             ImVec2 btnSize(18.0f, ImGui::GetItemRectSize().y);
-        //             ImGui::SameLine(0, 0);
-        //             if (ImGui::InvisibleButton("##incdec", btnSize)) {
-        //                 ImVec2 mousePos = ImGui::GetMousePos();
-        //                 ImVec2 btnMin = ImGui::GetItemRectMin();
-        //                 float halfY = btnSize.y * 0.5f;
-        //                 if (mousePos.y < btnMin.y + halfY) value[i] += step;
-        //                 else value[i] -= step;
-        //             }
-
-        //             ImDrawList* draw = ImGui::GetWindowDrawList();
-        //             ImVec2 btnMin = ImGui::GetItemRectMin();
-        //             ImVec2 btnMax = ImGui::GetItemRectMax();
-
-        //             float centerX = (btnMin.x + btnMax.x) * 0.5f;
-        //             float btnHeight = btnMax.y - btnMin.y;
-        //             float quarterH = btnHeight * 0.25f;
-        //             float s = 3.0f; 
-
-        //             draw->AddTriangleFilled(
-        //                 ImVec2(centerX - s, btnMin.y + quarterH + s),
-        //                 ImVec2(centerX + s, btnMin.y + quarterH + s),
-        //                 ImVec2(centerX,     btnMin.y + quarterH - s),
-        //                 IM_COL32(255, 255, 255, 255)
-        //             );
-
-        //             draw->AddTriangleFilled(
-        //                 ImVec2(centerX - s, btnMin.y + 3 * quarterH - s),
-        //                 ImVec2(centerX + s, btnMin.y + 3 * quarterH - s),
-        //                 ImVec2(centerX,     btnMin.y + 3 * quarterH + s),
-        //                 IM_COL32(255, 255, 255, 255)
-        //             );
-
-        //             ImGui::EndGroup();
-
-        //             if (i < 2) ImGui::SameLine(0, 10);
-
-        //             ImGui::PopID();
-        //             ImGui::PopID();
-        //         }
-        //     };
-
-        //     float3WithSingleIncDec("Position", obj.position, 0.05f);
-        //     float3WithSingleIncDec("Rotation", obj.rotation, 1.0f);
-        //     float3WithSingleIncDec("Scale", obj.scale, 0.05f);
-
-        // } else {
-        //     ImGui::Text("No object selected");
-        // }
-
         ImGui::End();
     }
 
@@ -291,37 +258,23 @@ void Window::_tick() {
         ImGui::Begin("Folders", &showFoldersWindow);
         ImGui::Text("Path: %s", currentFolder.c_str());
         ImGui::Separator();
-        if (ImGui::Button("..")) {
-            fs::path p(currentFolder);
-            if (p.parent_path().string() != exeFolder) {
-                currentFolder = p.parent_path().string();
-                refreshFolders();
-            }
-        }
-        ImGui::BeginChild("FolderList", ImVec2(0,0), true);
-        for (auto& entry : folderEntries) {
-            std::string label = "[DIR] " + entry.path().filename().string();
-            if (ImGui::Selectable(label.c_str())) {
-                currentFolder = entry.path().string();
-                refreshFolders();
-            }
-        }
-        ImGui::EndChild();
         ImGui::End();
     }
 
-}
+    imgui->endFrame();
 
-void Window::_render() {
-    glBindFramebuffer(GL_FRAMEBUFFER, gameFBO);
-    glViewport(0, 0, fboWidth, fboHeight);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    appLogic.draw();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, fboWidth, fboHeight);
-
-    if (imgui) imgui->endFrame();
+    // --------------------
+    // Update FPS/TPS
+    // --------------------
+    frameCount++;
+    double currentTime = glfwGetTime();
+    if (currentTime - lastFPSTime >= 1.0) {
+        fps = frameCount / (currentTime - lastFPSTime);
+        tps = tickCount / (currentTime - lastFPSTime);
+        frameCount = 0;
+        tickCount = 0;
+        lastFPSTime = currentTime;
+    }
 }
 
 GLFWwindow* Window::getWindow() { return handle; }
@@ -333,16 +286,55 @@ Window& Window::createWindow(IAppLogic& logic) {
 
 void Window::start() {
     _init();
-    while (!glfwWindowShouldClose(handle)) {
-        glClearColor(0.1f,0.1f,0.1f,1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        _tick();
+    lastTime = glfwGetTime();
+    float tickAccumulator = 0.0;
+
+    const double tickStep = 1.0 / timing.tickRate;
+
+    while (!glfwWindowShouldClose(handle)) {
+        double now = glfwGetTime();
+        double frameTime = now - lastTime;
+        lastTime = now;
+
+        // Avoid spiral of death
+        if (frameTime > 0.25)
+            frameTime = 0.25;
+
+        tickAccumulator += frameTime;
+
+        // --------------------
+        // FIXED TICK (LOGIC)
+        // --------------------
+        while (timing.fixedTick && tickAccumulator >= tickStep) {
+            _tick(); // FIXED RATE UPDATE
+            tickAccumulator -= tickStep;
+        }
+
+        // --------------------
+        // RENDER
+        // --------------------
         _render();
 
         glfwSwapBuffers(handle);
         glfwPollEvents();
+
+        // --------------------
+        // FPS CAP (SOFTWARE)
+        // --------------------
+        if (timing.capFPS && !timing.vsync) {
+            double targetFrame = 1.0 / timing.maxFPS;
+            double endTime = glfwGetTime();
+            double sleepTime = targetFrame - (endTime - now);
+
+            if (sleepTime > 0.0) {
+                std::this_thread::sleep_for(
+                    std::chrono::duration<double>(sleepTime)
+                );
+            }
+        }
     }
+
     cleanup();
 }
 
