@@ -70,7 +70,8 @@ public:
                 20,21,22, 22,23,20
             },
             {
-                "res/texture/0x1.jpg"
+                "res/texture/0x1.jpg",
+                // "res/texture/0x1.jpg"
             }
         };
 
@@ -82,10 +83,18 @@ public:
         };
         colorShaderId = renderer->createShader(colorShader);
 
-        SceneObject obj;
-        obj.meshId = squareMeshId;
-        obj.position = glm::vec3(0.0f, 0.0f, 0.0f);
-        objects.push_back(obj);
+        for (int x = -4; x <= 4; x++) {
+            for (int y = -4; y <= 4; y++) {
+                SceneObject obj;
+                obj.meshId = squareMeshId;
+                obj.position = glm::vec3(
+                    x * 0.4f,  
+                    y * 0.4f,
+                    0.0f
+                );
+                objects.push_back(obj);
+            }
+        }
 
         selectedObject = 0;
 
@@ -96,8 +105,16 @@ public:
     void tick() override {
         renderer->tick();
 
+        static double lastTime = glfwGetTime();
+        double currentTime = glfwGetTime();
+        float deltaTime = static_cast<float>(currentTime - lastTime);
+        lastTime = currentTime;
 
-    };
+        for (auto& obj : objects) {
+            obj.rotation.y += deltaTime;        
+            obj.rotation.x += deltaTime * 0.5f; 
+        }
+    }
 
     void draw() override {
 
@@ -117,12 +134,14 @@ public:
 
         for (auto& obj : objects) {
             glm::mat4 transform = glm::mat4(1.0f);
+
             transform = glm::translate(transform, obj.position);
-            transform = glm::rotate(
-                transform,
-                (float)glfwGetTime(),
-                glm::vec3(0.5f, 1.0f, 0.0f)
-            );
+
+            transform = glm::rotate(transform, obj.rotation.x, glm::vec3(1, 0, 0));
+            transform = glm::rotate(transform, obj.rotation.y, glm::vec3(0, 1, 0));
+            transform = glm::rotate(transform, obj.rotation.z, glm::vec3(0, 0, 1));
+
+            transform = glm::scale(transform, glm::vec3(0.2f));
 
             renderer->submitDrawCall(
                 obj.meshId,

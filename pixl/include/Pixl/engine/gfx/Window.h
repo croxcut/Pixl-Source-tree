@@ -18,7 +18,7 @@ struct EngineTiming {
     int maxFPS = 144;
 
     bool fixedTick = true;
-    double tickRate = 20.0; 
+    double tickRate = 60.0; 
 };
 
 class Window {
@@ -40,11 +40,9 @@ private:
     EngineTiming timing;
 
     double lastTime = 0.0;
-    double lastFPSTime = 0.0;
-    int frameCount = 0;
-    int tickCount = 0;
     float fps = 0.0f;
     float tps = 0.0f;
+    int ticksThisFrame = 0;
 
     bool showSceneWindow = true;
     bool showPropertiesWindow = true;

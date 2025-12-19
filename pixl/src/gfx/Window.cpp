@@ -186,9 +186,6 @@ void Window::_init() {
     imgui->init();
     initFBO();
     refreshFolders();
-    lastFPSTime = glfwGetTime();
-    frameCount = 0;
-    tickCount = 0;
     fps = 0.0f;
     tps = 0.0f;
 }
@@ -201,7 +198,6 @@ void Window::_tick() {
     }
 
     appLogic.tick(); 
-    tickCount++;
 }
 
 void Window::_render() {
@@ -256,16 +252,6 @@ void Window::_render() {
     }
 
     imgui->endFrame();
-
-    frameCount++;
-    double currentTime = glfwGetTime();
-    if (currentTime - lastFPSTime >= 1.0) {
-        fps = frameCount / (currentTime - lastFPSTime);
-        tps = tickCount / (currentTime - lastFPSTime);
-        frameCount = 0;
-        tickCount = 0;
-        lastFPSTime = currentTime;
-    }
 }
 
 GLFWwindow* Window::getWindow() { return handle; }
@@ -279,22 +265,58 @@ void Window::start() {
     _init();
 
     lastTime = glfwGetTime();
-    float tickAccumulator = 0.0;
+    double tickAccumulator = 0.0;
 
     const double tickStep = 1.0 / timing.tickRate;
+
+    // FPS & TPS tracking
+    double fpsTimer = 0.0;
+    int fpsFrames = 0;
+
+    double tpsTimer = 0.0;
+    int tpsTicks = 0;
 
     while (!glfwWindowShouldClose(handle)) {
         double now = glfwGetTime();
         double frameTime = now - lastTime;
         lastTime = now;
 
-        if (frameTime > 0.25) frameTime = 0.25;
+        if (frameTime > 0.25)
+            frameTime = 0.25;
 
         tickAccumulator += frameTime;
+        ticksThisFrame = 0;
 
-        while (timing.fixedTick && tickAccumulator >= tickStep) {
-            _tick(); 
-            tickAccumulator -= tickStep;
+        // Fixed timestep ticking
+        if (timing.fixedTick) {
+            while (tickAccumulator >= tickStep) {
+                _tick();
+                tickAccumulator -= tickStep;
+                ticksThisFrame++;
+            }
+        } else {
+            _tick();
+            ticksThisFrame = 1;
+        }
+
+        // === FPS & TPS Accumulators ===
+        fpsFrames++;
+        fpsTimer += frameTime;
+
+        tpsTicks += ticksThisFrame;
+        tpsTimer += frameTime;
+
+        // Update FPS & TPS every second
+        if (fpsTimer >= 1.0) {
+            fps = static_cast<float>(fpsFrames / fpsTimer);
+            fpsFrames = 0;
+            fpsTimer = 0.0;
+        }
+
+        if (tpsTimer >= 1.0) {
+            tps = static_cast<float>(tpsTicks / tpsTimer);
+            tpsTicks = 0;
+            tpsTimer = 0.0;
         }
 
         _render();
@@ -302,10 +324,10 @@ void Window::start() {
         glfwSwapBuffers(handle);
         glfwPollEvents();
 
+        // FPS cap
         if (timing.capFPS && !timing.vsync) {
             double targetFrame = 1.0 / timing.maxFPS;
-            double endTime = glfwGetTime();
-            double sleepTime = targetFrame - (endTime - now);
+            double sleepTime = targetFrame - (glfwGetTime() - now);
 
             if (sleepTime > 0.0) {
                 std::this_thread::sleep_for(
