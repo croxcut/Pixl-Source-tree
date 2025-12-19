@@ -17,6 +17,7 @@ OpenGL::~OpenGL() {
 }
 
 void OpenGL::init() {
+    glEnable(GL_DEPTH_TEST);
 }
 
 void OpenGL::tick() {
@@ -67,6 +68,8 @@ u64 OpenGL::createMesh(const Mesh& mesh) {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    meshData.indexCount = (u32)(mesh.indices.size());
+
     u64 meshId = generateId();
     meshes[meshId] = meshData;
 
@@ -93,6 +96,14 @@ void OpenGL::useShader(const u64& shaderId) {
         LOG(ERROR, "Shader not found: %llu", shaderId);
         return;
     }
+}
+
+void OpenGL::setViewProjection(
+    const glm::mat4& view,
+    const glm::mat4& projection
+) {
+    viewMatrix = view;
+    projectionMatrix = projection;
 }
 
 void OpenGL::drawMesh(const u64& meshId) {
@@ -129,6 +140,11 @@ void OpenGL::draw() {
 
     if (drawQueue.empty()) return;
 
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+
     boundVAO = 0;
     boundTextures.clear();
     currentShader = 0;
@@ -143,15 +159,14 @@ void OpenGL::draw() {
 
     for (const auto& call : drawQueue) {
 
-        auto meshIt = meshes.find(call.meshId);
-        auto shaderIt = shaders.find(call.shaderId);
-        if (meshIt == meshes.end() || shaderIt == shaders.end()) continue;
-
-        GLShader* shader = shaderIt->second;
-        MeshData& mesh = meshIt->second;
-
         useShader(call.shaderId);
+        GLShader* shader = shaders[call.shaderId];
 
+        // 🔑 CAMERA MATRICES (ONCE PER DRAW)
+        shader->setMat4("view", viewMatrix);
+        shader->setMat4("projection", projectionMatrix);
+
+        // 🔑 PER-OBJECT TRANSFORM
         shader->setMat4("transform", call.transform);
 
         drawMesh(call.meshId);

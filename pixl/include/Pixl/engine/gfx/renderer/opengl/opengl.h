@@ -28,7 +28,10 @@ private:
 
     u32 boundVAO = 0;
     std::vector<u32> boundTextures;
-    u64 currentShader;
+    u64 currentShader;  
+
+    glm::mat4 viewMatrix{1.0f};
+    glm::mat4 projectionMatrix{1.0f};
 
     std::vector<DrawCall> drawQueue;
 
@@ -46,8 +49,17 @@ public:
 
     void drawMesh(const u64& meshId) override;
     void useShader(const u64& shaderId) override;
-    
-    void submitDrawCall(const u64& meshId, const u64& shaderId, const glm::mat4& transform = glm::mat4(1.0f));
+
+    void setViewProjection(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    );
+
+    void submitDrawCall(
+        const u64& meshId, 
+        const u64& shaderId, 
+        const glm::mat4& transform
+    );
 
 private:
 

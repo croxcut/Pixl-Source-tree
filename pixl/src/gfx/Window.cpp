@@ -200,7 +200,7 @@ void Window::_tick() {
         lastVsync = timing.vsync;
     }
 
-    appLogic.tick(); // FIXED RATE GAME LOGIC
+    appLogic.tick(); 
     tickCount++;
 }
 
@@ -209,9 +209,6 @@ void Window::_render() {
 
     setupDocking();
 
-    // --------------------
-    // GAME WINDOW
-    // --------------------
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin("Game");
 
@@ -241,9 +238,6 @@ void Window::_render() {
     ImGui::End();
     ImGui::PopStyleVar();
 
-    // --------------------
-    // OPTIONAL WINDOWS
-    // --------------------
     if (showSceneWindow) {
         ImGui::Begin("Scene", &showSceneWindow);
         ImGui::End();
@@ -263,9 +257,6 @@ void Window::_render() {
 
     imgui->endFrame();
 
-    // --------------------
-    // Update FPS/TPS
-    // --------------------
     frameCount++;
     double currentTime = glfwGetTime();
     if (currentTime - lastFPSTime >= 1.0) {
@@ -297,31 +288,20 @@ void Window::start() {
         double frameTime = now - lastTime;
         lastTime = now;
 
-        // Avoid spiral of death
-        if (frameTime > 0.25)
-            frameTime = 0.25;
+        if (frameTime > 0.25) frameTime = 0.25;
 
         tickAccumulator += frameTime;
 
-        // --------------------
-        // FIXED TICK (LOGIC)
-        // --------------------
         while (timing.fixedTick && tickAccumulator >= tickStep) {
-            _tick(); // FIXED RATE UPDATE
+            _tick(); 
             tickAccumulator -= tickStep;
         }
 
-        // --------------------
-        // RENDER
-        // --------------------
         _render();
 
         glfwSwapBuffers(handle);
         glfwPollEvents();
 
-        // --------------------
-        // FPS CAP (SOFTWARE)
-        // --------------------
         if (timing.capFPS && !timing.vsync) {
             double targetFrame = 1.0 / timing.maxFPS;
             double endTime = glfwGetTime();

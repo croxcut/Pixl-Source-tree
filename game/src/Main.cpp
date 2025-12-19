@@ -29,23 +29,52 @@ public:
 
         renderer = Renderer::getInstance(OPENGL);
 
-        Mesh squareMesh = {
+        Mesh cubeMesh = {
             {
-                { 0.5f,  0.5f, 0.0f,    0.0f, 0.0f, 1.0f,   1.0f, 1.0f},
-                { 0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f},
-                {-0.5f, -0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   0.0f, 0.0f},
-                {-0.5f,  0.5f, 0.0f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f},
+                { -0.5f, -0.5f,  0.5f,  1,0,0,  0,0 },
+                {  0.5f, -0.5f,  0.5f,  1,0,0,  1,0 },
+                {  0.5f,  0.5f,  0.5f,  1,0,0,  1,1 },
+                { -0.5f,  0.5f,  0.5f,  1,0,0,  0,1 },
+
+                {  0.5f, -0.5f, -0.5f,  0,1,0,  0,0 },
+                { -0.5f, -0.5f, -0.5f,  0,1,0,  1,0 },
+                { -0.5f,  0.5f, -0.5f,  0,1,0,  1,1 },
+                {  0.5f,  0.5f, -0.5f,  0,1,0,  0,1 },
+
+                { -0.5f, -0.5f, -0.5f,  0,0,1,  0,0 },
+                { -0.5f, -0.5f,  0.5f,  0,0,1,  1,0 },
+                { -0.5f,  0.5f,  0.5f,  0,0,1,  1,1 },
+                { -0.5f,  0.5f, -0.5f,  0,0,1,  0,1 },
+
+                {  0.5f, -0.5f,  0.5f,  1,1,0,  0,0 },
+                {  0.5f, -0.5f, -0.5f,  1,1,0,  1,0 },
+                {  0.5f,  0.5f, -0.5f,  1,1,0,  1,1 },
+                {  0.5f,  0.5f,  0.5f,  1,1,0,  0,1 },
+
+                { -0.5f,  0.5f,  0.5f,  1,0,1,  0,0 },
+                {  0.5f,  0.5f,  0.5f,  1,0,1,  1,0 },
+                {  0.5f,  0.5f, -0.5f,  1,0,1,  1,1 },
+                { -0.5f,  0.5f, -0.5f,  1,0,1,  0,1 },
+
+                { -0.5f, -0.5f, -0.5f,  0,1,1,  0,0 },
+                {  0.5f, -0.5f, -0.5f,  0,1,1,  1,0 },
+                {  0.5f, -0.5f,  0.5f,  0,1,1,  1,1 },
+                { -0.5f, -0.5f,  0.5f,  0,1,1,  0,1 },
             },
             {
-                0, 1, 3,
-                1, 2, 3
+                 0, 1, 2,  2, 3, 0,
+                 4, 5, 6,  6, 7, 4,
+                 8, 9,10, 10,11, 8,
+                12,13,14, 14,15,12,
+                16,17,18, 18,19,16,
+                20,21,22, 22,23,20
             },
             {
-                "res/texture/0x1.jpg",
+                "res/texture/0x1.jpg"
             }
         };
 
-        squareMeshId = renderer->createMesh(squareMesh);
+        squareMeshId = renderer->createMesh(cubeMesh);
 
         Shader colorShader = {
             "res/shader/vertex.glsl",
@@ -56,8 +85,6 @@ public:
         SceneObject obj;
         obj.meshId = squareMeshId;
         obj.position = glm::vec3(0.0f, 0.0f, 0.0f);
-        obj.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-        obj.scale = glm::vec3(1.0f, 1.0f, 1.0f);
         objects.push_back(obj);
 
         selectedObject = 0;
@@ -73,22 +100,39 @@ public:
     };
 
     void draw() override {
+
+        glm::mat4 view = glm::translate(
+            glm::mat4(1.0f),
+            glm::vec3(0.0f, 0.0f, -3.0f)
+        );
+
+        glm::mat4 projection = glm::perspective(
+            glm::radians(45.0f),
+            800.0f / 600.0f,
+            0.1f,
+            100.0f
+        );
+
+        renderer->setViewProjection(view, projection);
+
         for (auto& obj : objects) {
             glm::mat4 transform = glm::mat4(1.0f);
-
             transform = glm::translate(transform, obj.position);
+            transform = glm::rotate(
+                transform,
+                (float)glfwGetTime(),
+                glm::vec3(0.5f, 1.0f, 0.0f)
+            );
 
-            transform = glm::rotate(transform, glm::radians(obj.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-            transform = glm::rotate(transform, glm::radians(obj.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-            transform = glm::rotate(transform, glm::radians(obj.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-            transform = glm::scale(transform, obj.scale);
-            
-            renderer->submitDrawCall(obj.meshId, colorShaderId, transform);
+            renderer->submitDrawCall(
+                obj.meshId,
+                colorShaderId,
+                transform
+            );
         }
 
         renderer->draw();
-    };
+    }
 
     void cleanup() override {
         if (renderer) {

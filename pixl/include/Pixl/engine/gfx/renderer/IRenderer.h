@@ -25,6 +25,12 @@ public:
     virtual void drawMesh(const u64& meshId) = 0;
     virtual void useShader(const u64& shaderId) = 0;
 
+    virtual void setViewProjection(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    );
+
+
     virtual void submitDrawCall(const u64& meshId, const u64& shaderId, const glm::mat4& transform = glm::mat4(1.0f)) = 0;
 
 };

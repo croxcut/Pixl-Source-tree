@@ -10,7 +10,9 @@
 #include <iomanip>
 #include <sstream>
 
-enum Level { INFO, WARN, ERROR };
+#include "types.h"
+
+enum : u8 { INFO, WARN, ERROR } Level;
 
 inline std::string currentTime() {
     auto now = std::chrono::system_clock::now();
@@ -40,8 +42,8 @@ inline std::string currentTime() {
             ((lvl) == ERROR) ? "ERROR" : "DEBUG"; \
         char buffer[1024]; \
         snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
-        std::cout << "[PIXL][DEBUG][" << currentTime() << "] " \
-                  << prefix << " : " << buffer << "\n"; \
+        std::cout << "[PIXL | DEBUG][" << currentTime() << "] " \
+                  << "[" << prefix << "]" << " : " << buffer << "\n"; \
     } while(0)
 
 #define ASSERT(expr, fmt, ...) \
