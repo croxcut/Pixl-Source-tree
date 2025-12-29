@@ -1,7 +1,7 @@
 CXX = g++
 CFLAGS = -std=c++17 -O2 -static-libgcc -static-libstdc++
 
-ENGINE_DIR = pixl
+ENGINE_DIR = libs
 GAME_DIR = game
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
