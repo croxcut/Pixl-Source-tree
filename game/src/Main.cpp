@@ -1,16 +1,55 @@
 #include <iostream>
 
 #include <pixl/window/window.h>
+#include <pixl/engine/engine.h>
+#include <pixl/engine/renderer/backend/gl_mesh.h>
+#include <pixl/engine/renderer/backend/gl_shader.h>
+
+class App : public IAppLogic {
+private:
+    GLMesh mesh;
+    GLShader shader;
+public:
+    void init() {
+        Mesh triangle {
+            {
+                {-0.5f, -0.5f, 0.0f },
+                { 0.5f, -0.5f, 0.0f }, 
+                { 0.0f,  0.5f, 0.0f } 
+            }
+        };
+
+        mesh.create_mesh(triangle);
+
+        ShaderSource source{
+            "res/shaders/triangle.vert",
+            "res/shaders/triangle.frag"
+        };
+
+        shader.create_shader(source);
+    }
+
+    void tick(const f32& dt) {
+
+    }
+
+    void render() {
+        shader.use();
+        mesh.draw();
+        shader.clear();
+    }
+
+    void cleanup() {
+
+    }
+
+};
 
 int main(int argc, char* argv[]) {
 
-    WindowOpts opts;
-    Window* window = Window::create_window(opts);
-
-    while(!window->close()) {
-        window->poll_events();
-        window->refresh();
-    }
+    App app;
+    Engine engine(app);
+    engine.start();
     
     return 0;
 }

@@ -9,7 +9,6 @@
 
 #include "types.h"
 
-/* Return shortened file path */
 static inline const char* pixlShortFile(const char* path) {
     const char* src_pos;
 
