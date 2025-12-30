@@ -6,7 +6,7 @@
 
 class App : public IAppLogic {
 private:
-    Renderer* renderer = nullptr;           // ✅ renderer now lives long enough
+    Renderer* renderer = nullptr;           
     u64 mesh_id = 0;
     u64 shader_id = 0;
     OpenGL opengl;
@@ -18,20 +18,15 @@ public:
         Mesh triangle;
 
         triangle.vertices = {
-            // position           // color        // uv
-            { -0.5f, -0.5f, 0.0f,   1, 0, 0,        0, 0 },
-            {  0.5f, -0.5f, 0.0f,   0, 1, 0,        1, 0 },
-            {  0.0f,  0.5f, 0.0f,   0, 0, 1,        0.5f, 1 }
+            { -0.5f, -0.5f, 0.0f,  1, 0, 0,    0, 0 },
+            {  0.5f, -0.5f, 0.0f,  0, 1, 0,    1, 0 },
+            {  0.0f,  0.5f, 0.0f,  0, 0, 1,  0.5, 1 }
         };
 
         triangle.indices = { 0, 1, 2 };
 
-        // store ID
         mesh_id = renderer->add_mesh(triangle);
 
-        // -------------------
-        // Shader
-        // -------------------
         Shader shader{
             "res/shaders/triangle.vert",
             "res/shaders/triangle.frag"
@@ -41,7 +36,7 @@ public:
     }
 
     void tick(const f32& dt) override {
-        // nothing yet
+
     }
 
     void render() override {

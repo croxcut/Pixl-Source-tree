@@ -60,18 +60,15 @@ LIBS = -lopengl32 -L$(GLFW_DIR)/lib-mingw -lglfw3 \
 
 all: $(OUTPUT)
 
-# ---------------- RESOURCES ----------------
 resources:
 	@mkdir -p $(BUILD_RES_DIR)
 	cp -r $(RES_DIR)/* $(BUILD_RES_DIR)/
 
-# ---------------- LINK ----------------
 $(OUTPUT): $(OBJECTS) | resources
 	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $(OBJECTS) -o $@ $(LIBS)
 	cp $(ASSIMP_DIR)/bin/libassimp-6.dll $(BUILD_DIR)/
 
-# ---------------- COMPILE ----------------
 $(OBJ_DIR)/engine/%.o: $(ENGINE_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
@@ -88,7 +85,6 @@ $(OBJ_DIR)/imgui/%.o: $(IMGUI_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-# ---------------- UTILS ----------------
 run: $(OUTPUT)
 	./$(OUTPUT)
 

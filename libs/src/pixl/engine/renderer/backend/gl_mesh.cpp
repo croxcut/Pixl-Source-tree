@@ -1,6 +1,6 @@
 #include "pixl/engine/renderer/backend/gl_mesh.h"
 
-#include <pixl/utility/log.h>
+#include "pixl/utility/log.h"
 #include <glad/glad.h>
 
 GLMesh::GLMesh(struct Mesh& mesh) {

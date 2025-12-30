@@ -10,7 +10,7 @@
 struct WindowOpts {
     u32 width = 1280;
     u32 height = 720;
-    const char* title = "Pixl Test";
+    const char* title = "Pixl Engine v0.0.5";
 };
 
 class Window {

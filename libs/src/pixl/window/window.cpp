@@ -1,7 +1,6 @@
 #include "pixl/window/window.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
-
 Window::Window(struct WindowOpts& opts) {
     LOG("Window Created w: %llu | h: %llu", opts.width, opts.height);
 
@@ -31,8 +30,6 @@ Window::Window(struct WindowOpts& opts) {
         LOG("Failed to load GLAD!");
         cleanup();
     }    
-
-    glViewport(0, 0, opts.width, opts.height);
    
     glfwSetFramebufferSizeCallback(handle, framebuffer_size_callback);  
 

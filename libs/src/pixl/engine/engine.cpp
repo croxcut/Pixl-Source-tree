@@ -37,7 +37,7 @@ void Engine::tick(const f32& dt) {
 
 void Engine::run() {
     init();
-    
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
