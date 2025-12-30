@@ -1,63 +1,66 @@
 #include <iostream>
 
-#include <pixl/window/window.h>
 #include <pixl/engine/engine.h>
-#include <pixl/engine/renderer/backend/gl_mesh.h>
-#include <pixl/engine/renderer/backend/gl_shader.h>
 #include <pixl/engine/renderer/backend/opengl.h>
 #include <pixl/engine/renderer/renderer.h>
 
 class App : public IAppLogic {
 private:
-    GLMesh mesh;
-    GLShader shader;
-
-    Renderer* renderer = nullptr;
-
+    Renderer* renderer = nullptr;           // ✅ renderer now lives long enough
+    u64 mesh_id = 0;
+    u64 shader_id = 0;
+    OpenGL opengl;
 public:
-    void init() {
-        OpenGL opengl;
+    void init() override {
+
         renderer = &opengl;
 
-        Mesh triangle {
-            {
-                {-0.5f, -0.5f, 0.0f },
-                { 0.5f, -0.5f, 0.0f }, 
-                { 0.0f,  0.5f, 0.0f } 
-            }
+        Mesh triangle;
+
+        triangle.vertices = {
+            // position           // color        // uv
+            { -0.5f, -0.5f, 0.0f,   1, 0, 0,        0, 0 },
+            {  0.5f, -0.5f, 0.0f,   0, 1, 0,        1, 0 },
+            {  0.0f,  0.5f, 0.0f,   0, 0, 1,        0.5f, 1 }
         };
 
-        mesh.create_mesh(triangle);
+        triangle.indices = { 0, 1, 2 };
 
-        Shader source{
+        // store ID
+        mesh_id = renderer->add_mesh(triangle);
+
+        // -------------------
+        // Shader
+        // -------------------
+        Shader shader{
             "res/shaders/triangle.vert",
             "res/shaders/triangle.frag"
         };
 
-        shader.create_shader(source);
+        shader_id = renderer->add_shader(shader);
     }
 
-    void tick(const f32& dt) {
-
+    void tick(const f32& dt) override {
+        // nothing yet
     }
 
-    void render() {
-        shader.use();
-        mesh.draw();
-        shader.clear();
+    void render() override {
+        DrawCall call{};
+        call.mesh_id = mesh_id;
+        call.shader_id = shader_id;
+
+        renderer->submit_draw_call(call);
+        renderer->draw();
     }
 
-    void cleanup() {
-
+    void cleanup() override {
+        renderer->cleanup();
     }
-
 };
 
-int main(int argc, char* argv[]) {
-
+int main() {
     App app;
     Engine engine(app);
     engine.start();
-    
     return 0;
 }

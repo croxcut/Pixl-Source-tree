@@ -18,6 +18,8 @@ class Window {
 private:
     GLFWwindow* handle = nullptr;
 
+    bool vsync = false;
+
 public:
     ~Window();
 
@@ -27,6 +29,8 @@ public:
     void poll_events();
 
     bool close();
+
+    void toggle_vsync();
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;

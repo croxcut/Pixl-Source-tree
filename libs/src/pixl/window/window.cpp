@@ -33,6 +33,7 @@ Window::Window(struct WindowOpts& opts) {
     }    
 
     glViewport(0, 0, opts.width, opts.height);
+   
     glfwSetFramebufferSizeCallback(handle, framebuffer_size_callback);  
 
     glfwSwapInterval(0);    
@@ -45,6 +46,11 @@ Window::~Window() {
 Window* Window::create_window(struct WindowOpts& opts) {
     static Window _self(opts);
     return &_self;
+}
+
+void Window::toggle_vsync() {
+    vsync = !vsync;
+    glfwSwapInterval(vsync);        
 }
 
 bool Window::close() {
@@ -67,7 +73,6 @@ void Window::cleanup() {
     LOG("Window Resources dumped");
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }  

@@ -2,7 +2,7 @@
 
 #include "pixl/utility/file.h"
 
-void GLShader::create_shader(struct Shader& shader) {
+GLShader::GLShader(struct Shader& shader) {
     program = create_program(
         compile(
             shader.vertex, 

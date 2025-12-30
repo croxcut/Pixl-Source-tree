@@ -6,8 +6,9 @@
 
 class Renderer {
 public:
-    virtual void add_mesh(struct Mesh& mesh) = 0;
-    virtual void add_shader(struct Shader& shader) = 0;
+    virtual u64 add_mesh(struct Mesh& mesh) = 0;
+    virtual u64 add_shader(struct Shader& shader) = 0;
+    virtual void submit_draw_call(const DrawCall& draw_call);
     virtual void draw() = 0;
     virtual void cleanup() = 0;
 

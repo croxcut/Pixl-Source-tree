@@ -5,7 +5,7 @@ Engine::Engine(IAppLogic& applogic)
 {
     WindowOpts opts;
     window = Window::create_window(opts);
-    
+    LOG("Engine Created");    
 }
 
 Engine::~Engine() {
@@ -14,10 +14,12 @@ Engine::~Engine() {
 
 void Engine::init() {
     applogic->init();
+    LOG("Engine started");
 }
 
 void Engine::start() {
     running = true;
+    LOG("Engine running");
     run();
 }
 
@@ -35,17 +37,18 @@ void Engine::tick(const f32& dt) {
 
 void Engine::run() {
     init();
-
-    float dt;
+    
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    while(running && !window->close()) {
-        tick(dt);
+    float dt = 0.0f;
 
-        glClear(GL_COLOR_BUFFER_BIT);
-        render();
-
+    while (running) {
         window->poll_events();
+        if (window->close()) break;
+
+        tick(dt);
+        render();
         window->refresh();
     }
 }

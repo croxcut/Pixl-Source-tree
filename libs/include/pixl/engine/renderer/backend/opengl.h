@@ -8,23 +8,31 @@
 #include <unordered_map>
 
 class OpenGL : public Renderer {
-    std::unordered_map<u64, GLShader> shaders;
-    std::unordered_map<u64, GLMesh> meshes;
-
+    
 private:
+    std::unordered_map<u64, GLShader> shaders;
+    std::unordered_map<u64, Mesh> meshes;
+
+    u32 bound_vao = 0;
+    std::vector<u32> bound_textures;
+    u64 current_shader;
+
+    std::vector<DrawCall> draw_queue;
 
 public:
     OpenGL();
     ~OpenGL();
 
-    void add_mesh(struct Mesh& mesh) override;
-    void add_shader(struct Shader& shader) override;
+    u64 add_mesh(struct Mesh& mesh) override;
+    u64 add_shader(struct Shader& shader) override;
     void draw() override;
     void cleanup() override;
+    void submit_draw_call(const DrawCall& draw_call);
 
 private:
 
-    void draw_mesh();
+    void draw_mesh(const u64& mesh_id);
+    void use_shader(const u64& shader_id);
 
 };
 
