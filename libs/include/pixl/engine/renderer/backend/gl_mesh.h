@@ -4,7 +4,6 @@
 #include "../render_objects.h"
 
 class GLMesh {
-
 private:
     u32 vao, vbo;
     size_t size;
@@ -16,6 +15,7 @@ private:
 public:
     void create_mesh(struct Mesh& mesh);
     void draw() const;
+
 };
 
 #endif

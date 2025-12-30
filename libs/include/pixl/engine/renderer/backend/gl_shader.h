@@ -13,7 +13,7 @@ private:
 
 public:
 
-    void create_shader(struct ShaderSource& shader);
+    void create_shader(struct Shader& shader);
 
     void use();
     void clear();

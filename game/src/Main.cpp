@@ -4,13 +4,21 @@
 #include <pixl/engine/engine.h>
 #include <pixl/engine/renderer/backend/gl_mesh.h>
 #include <pixl/engine/renderer/backend/gl_shader.h>
+#include <pixl/engine/renderer/backend/opengl.h>
+#include <pixl/engine/renderer/renderer.h>
 
 class App : public IAppLogic {
 private:
     GLMesh mesh;
     GLShader shader;
+
+    Renderer* renderer = nullptr;
+
 public:
     void init() {
+        OpenGL opengl;
+        renderer = &opengl;
+
         Mesh triangle {
             {
                 {-0.5f, -0.5f, 0.0f },
@@ -21,7 +29,7 @@ public:
 
         mesh.create_mesh(triangle);
 
-        ShaderSource source{
+        Shader source{
             "res/shaders/triangle.vert",
             "res/shaders/triangle.frag"
         };

@@ -2,22 +2,19 @@
 
 #include "pixl/utility/file.h"
 
-void GLShader::create_shader(struct ShaderSource& shader) {
-    vertex = compile(
-        shader.vertex, 
-        GL_VERTEX_SHADER);
-
-    fragment = compile(
-        shader.fragment, 
-        GL_FRAGMENT_SHADER);
-
+void GLShader::create_shader(struct Shader& shader) {
     program = create_program(
-        vertex, 
-        fragment);
+        compile(
+            shader.vertex, 
+            GL_VERTEX_SHADER), 
+        compile(
+            shader.fragment, 
+            GL_FRAGMENT_SHADER)
+        );
 }
 
 u32 GLShader::compile(const char* source, GLenum type) {
-    const char* _source = load_shader_file(source);
+    const char* _source = file::load_shader(source);
     
     u32 _shader = 0;
     _shader = glCreateShader(type);

@@ -13,7 +13,7 @@ struct Mesh {
     std::vector<Vertex> vertices; 
 };
 
-struct ShaderSource {
+struct Shader {
     const char* vertex;
     const char* fragment;
 };
