@@ -22,7 +22,7 @@ u32 GLShader::compile(const char* source, GLenum type) {
     glCompileShader(_shader);
     
     delete[] _source;
-
+    
     return _shader;
 }
 
@@ -38,7 +38,7 @@ u32 GLShader::create_program(const u32& vertex, const u32& fragment) {
     glDeleteShader(fragment);
     
     return _program;
-}
+}                       
 
 void GLShader::use() {
     glUseProgram(program);
@@ -46,5 +46,4 @@ void GLShader::use() {
 
 void GLShader::clear() {
     glUseProgram(0);
-}
-
+}            

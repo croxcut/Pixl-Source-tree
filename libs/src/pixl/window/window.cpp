@@ -33,7 +33,7 @@ Window::Window(struct WindowOpts& opts) {
    
     glfwSetFramebufferSizeCallback(handle, framebuffer_size_callback);  
 
-    glfwSwapInterval(0);    
+    glfwSwapInterval(0);     
 }
 
 Window::~Window() {

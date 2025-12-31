@@ -15,15 +15,16 @@ public:
 
         renderer = &opengl;
 
-        Mesh triangle;
-
-        triangle.vertices = {
-            { -0.5f, -0.5f, 0.0f,  1, 0, 0,    0, 0 },
-            {  0.5f, -0.5f, 0.0f,  0, 1, 0,    1, 0 },
-            {  0.0f,  0.5f, 0.0f,  0, 0, 1,  0.5, 1 }
+        Mesh triangle {
+            {
+                { -0.5f, -0.5f, 0.0f,  1, 0, 0,    0, 0 },
+                {  0.5f, -0.5f, 0.0f,  0, 1, 0,    1, 0 },
+                {  0.0f,  0.5f, 0.0f,  0, 0, 1,  0.5, 1 }
+            },
+            {
+                { 0, 1, 2 }
+            }
         };
-
-        triangle.indices = { 0, 1, 2 };
 
         mesh_id = renderer->add_mesh(triangle);
 
