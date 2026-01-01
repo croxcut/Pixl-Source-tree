@@ -1,5 +1,7 @@
 #include <pixl/engine/engine.h>
 
+#include <chrono>
+
 Engine::Engine(IAppLogic& applogic)
     : applogic(&applogic) 
 {
@@ -41,18 +43,43 @@ void Engine::run() {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    float dt = 0.0f;
-
+    using clock = std::chrono::high_resolution_clock;
+    constexpr float dt = 1.0f / 60.0f;
+    float accumulator = 0.0f;
+    auto current_time = clock::now();
+    float fps_timer = 0.0f;
+    int frames = 0, ticks = 0;
+    
     while (running) {
+        auto new_time = clock::now();
+        float delta_time = std::chrono::duration<float>(new_time - current_time).count();
+        current_time = new_time;
+        accumulator += delta_time;
+        fps_timer += delta_time;
+        
         window->poll_events();
         if (window->close()) break;
 
-        tick(dt);
+        while(accumulator >= dt) {
+            tick(dt);
+            accumulator -= dt;
+            ticks++;    
+        }
+
         render();
+        frames++;
+
         window->refresh();
+
+        if(fps_timer >= 1.0f) {
+            LOG("FPS: %d | TPS: %d", frames, ticks);
+            frames = 0;
+            ticks = 0;
+            fps_timer -= 1.0f;
+        }
     }
 }
 
 void Engine::cleanup() {
-
+    applogic->cleanup();
 }
