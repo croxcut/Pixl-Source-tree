@@ -5,8 +5,9 @@
 #include <random>
 
 #include "types.h"
+#include "qualifier.h"
 
-inline u64 generate_id() noexcept {
+PIXL_FUNC_INLINE u64 generate_id() noexcept {
     static std::atomic<u64> counter{1};
     return counter.fetch_add(1, std::memory_order_relaxed);
 }

@@ -56,7 +56,7 @@ private:
 
     struct CubeInstance {
         glm::vec3 position;
-        glm::vec3 rotation; // Euler angles
+        glm::vec3 rotation; 
     };
 
     std::vector<CubeInstance> cubes;
@@ -106,7 +106,7 @@ public:
         std::uniform_real_distribution<float> pos_dist(-20.0f, 20.0f);
         std::uniform_real_distribution<float> rot_dist(0.0f, 360.0f);
 
-        for (int i = 0; i < 150; ++i) {
+        for (int i = 0; i < 999; ++i) {
             cubes.push_back({
                 glm::vec3(pos_dist(rng), pos_dist(rng), pos_dist(rng)),
                 glm::vec3(rot_dist(rng), rot_dist(rng), rot_dist(rng))
@@ -130,34 +130,6 @@ public:
         last_y = ypos;
 
         camera.process_mouse(xoffset, yoffset);
-
-        // --- Logging Total / Rendered / Culled objects once per second ---
-        log_timer += dt;
-        if(log_timer >= 1.0f) {
-            // Count rendered objects based on frustum culling
-            glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
-            glm::mat4 view = camera.get_view_matrix();
-            glm::mat4 pv = proj * view;
-
-            Frustum frustum;
-            frustum.update(pv);
-
-            const float cube_radius = 0.87f;
-
-            int rendered_objects = 0;
-            for (auto& cube : cubes) {
-                if(frustum.is_sphere_visible(cube.position, cube_radius))
-                    rendered_objects++;
-            }
-
-            int total_objects = (int)cubes.size();
-            int culled_objects = total_objects - rendered_objects;
-
-            LOG("Total Objects: %d | Rendered Objects: %d | Culled Objects: %d",
-                total_objects, rendered_objects, culled_objects);
-
-            log_timer = 0.0f; // reset timer
-        }
     }
 
     void render() override {

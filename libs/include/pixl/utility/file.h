@@ -7,9 +7,10 @@
 #include <cstring>
 
 #include "log.h"
+#include "qualifier.h"
 
 namespace file{
-    inline const char* load_shader(const char* shaderFile) {
+    PIXL_FUNC_INLINE const char* load_shader(const char* shaderFile) {
         std::ifstream shader_t(shaderFile);
         ASSERT(shader_t, "Failed to Open Shader File at: %s", shaderFile);
 

@@ -81,12 +81,12 @@ void Engine::run() {
 
         window->refresh();
 
-        // if(fps_timer >= 1.0f) {
-        //     LOG("FPS: %d | TPS: %d", frames, ticks);
-        //     frames = 0;
-        //     ticks = 0;
-        //     fps_timer -= 1.0f;
-        // }
+        if(fps_timer >= 1.0f) {
+            LOG("FPS: %d | TPS: %d", frames, ticks);
+            frames = 0;
+            ticks = 0;
+            fps_timer -= 1.0f;
+        }
     }
 }
 

@@ -8,8 +8,9 @@
 #include <time.h>
 
 #include "types.h"
+#include "qualifier.h"
 
-static inline const char* pixlShortFile(const char* path) {
+static PIXL_FUNC_INLINE const char* pixlShortFile(const char* path) {
     const char* src_pos;
 
     src_pos = strstr(path, "src\\");
