@@ -5,9 +5,14 @@
 Engine::Engine(IAppLogic& applogic)
     : applogic(&applogic) 
 {
+    window = Window::create_window();   
     WindowOpts opts;
-    window = Window::create_window();
-    window->set_opts(opts);
+    opts.title = "Pixl Engine v0.1.15";
+    opts.width = 1280;
+    opts.height = 720;
+
+    window->set_opts(opts);     
+    window->init();             
     LOG("Engine Created");    
 }
 
@@ -41,8 +46,12 @@ void Engine::tick(const f32& dt) {
 void Engine::run() {
     init();
 
-    glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+    glEnable(GL_DEPTH_TEST);    
+    glEnable(GL_CULL_FACE);     
+    glCullFace(GL_BACK);        
+    glFrontFace(GL_CCW);        
 
     using clock = std::chrono::high_resolution_clock;
     constexpr float dt = 1.0f / 60.0f;
@@ -72,12 +81,12 @@ void Engine::run() {
 
         window->refresh();
 
-        if(fps_timer >= 1.0f) {
-            LOG("FPS: %d | TPS: %d", frames, ticks);
-            frames = 0;
-            ticks = 0;
-            fps_timer -= 1.0f;
-        }
+        // if(fps_timer >= 1.0f) {
+        //     LOG("FPS: %d | TPS: %d", frames, ticks);
+        //     frames = 0;
+        //     ticks = 0;
+        //     fps_timer -= 1.0f;
+        // }
     }
 }
 

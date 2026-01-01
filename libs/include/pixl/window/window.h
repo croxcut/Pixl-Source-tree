@@ -10,15 +10,14 @@
 struct WindowOpts {
     u32 width = 1280;
     u32 height = 720;
-    const char* title = "Pixl Engine v0.0.5";
+    const char* title = "";
 };
 
 class Window {
-
 private:
     GLFWwindow* handle = nullptr;
     bool vsync = false;
-    WindowOpts opts;  
+    WindowOpts opts;
 
 public:
     ~Window();
@@ -27,6 +26,7 @@ public:
 
     void set_opts(const WindowOpts& new_opts);  
 
+    void init();           // now public
     void refresh();
     void poll_events();
     bool close();
@@ -42,7 +42,6 @@ public:
 
 private:
     Window();  
-    void init(); 
     void cleanup();
 };
 

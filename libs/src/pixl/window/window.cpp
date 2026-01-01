@@ -12,11 +12,6 @@ Window::~Window() {
 
 Window* Window::create_window() {
     static Window _self;
-
-    if (!_self.handle) {
-        _self.init(); 
-    }
-
     return &_self;
 }
 
