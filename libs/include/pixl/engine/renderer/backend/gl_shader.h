@@ -18,6 +18,8 @@ public:
     void use();
     void clear();
 
+    void set_mat4(const char* name, const glm::mat4& mat);
+
 private:
 
     u32 compile(const char* source, GLenum type);

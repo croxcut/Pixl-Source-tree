@@ -58,7 +58,7 @@ void Engine::run() {
         fps_timer += delta_time;
         
         window->poll_events();
-        if (window->close()) break;
+        if (window->close()) running = false;
 
         while(accumulator >= dt) {
             tick(dt);

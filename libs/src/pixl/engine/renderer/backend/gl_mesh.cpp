@@ -30,5 +30,5 @@ GLMesh::GLMesh(struct Mesh& mesh) {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(f32)));
     glEnableVertexAttribArray(2);
     
-    mesh.size = mesh.vertices.size();
+    mesh.size = mesh.indices.size();
 }

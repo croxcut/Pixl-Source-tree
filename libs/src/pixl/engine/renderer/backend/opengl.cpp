@@ -89,17 +89,28 @@ void OpenGL::draw() {
     bound_textures.clear();
     current_shader = 0;
 
+    // sort by shader -> mesh to minimize state changes
     std::sort(draw_queue.begin(), draw_queue.end(),
-        [](const DrawCall a, const DrawCall b) {
+        [](const DrawCall& a, const DrawCall& b) {
             if(a.shader_id == b.shader_id)
                 return a.mesh_id < b.mesh_id;
             return a.shader_id < b.shader_id; 
         }
-    ); 
+    );
 
     for(const auto& call : draw_queue) {
         use_shader(call.shader_id);
-        
+
+        auto it_shader = shaders.find(call.shader_id);
+        if(it_shader != shaders.end()) {
+            // old single transform (still supported)
+            it_shader->second.set_mat4("transform", call.transform);
+
+            // apply all dynamic mat4 uniforms
+            for (const auto& pair : call.mat4_uniforms) {
+                it_shader->second.set_mat4(pair.first.c_str(), pair.second);
+            }
+        }
 
         draw_mesh(call.mesh_id);
     }

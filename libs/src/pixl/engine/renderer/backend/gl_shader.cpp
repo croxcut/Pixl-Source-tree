@@ -1,5 +1,6 @@
 #include "pixl/engine/renderer/backend/gl_shader.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include "pixl/utility/file.h"
 
 GLShader::GLShader(struct Shader& shader) {
@@ -47,3 +48,10 @@ void GLShader::use() {
 void GLShader::clear() {
     glUseProgram(0);
 }            
+
+void GLShader::set_mat4(const char* name, const glm::mat4& mat) {
+    GLint loc = glGetUniformLocation(program, name);
+    if (loc != -1) {
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+    }
+}
