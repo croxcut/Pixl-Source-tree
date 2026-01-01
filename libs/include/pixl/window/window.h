@@ -17,27 +17,32 @@ class Window {
 
 private:
     GLFWwindow* handle = nullptr;
-
     bool vsync = false;
+    WindowOpts opts;  
 
 public:
     ~Window();
 
-    static Window* create_window(struct WindowOpts& opts);
+    static Window* create_window();
+
+    void set_opts(const WindowOpts& new_opts);  
 
     void refresh();
     void poll_events();
-
     bool close();
-
     void toggle_vsync();
+    bool key_down(int key);
+
+    GLFWwindow* get_handle() { return handle; }
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
     Window(Window&&) = delete;
     Window& operator=(Window&&) = delete;
+
 private:
-    Window(struct WindowOpts& opts);
+    Window();  
+    void init(); 
     void cleanup();
 };
 

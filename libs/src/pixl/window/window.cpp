@@ -1,7 +1,30 @@
 #include "pixl/window/window.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);  
-Window::Window(struct WindowOpts& opts) {
+
+Window::Window() {
+    // opts already initialized with default values
+}
+
+Window::~Window() {
+    cleanup();
+}
+
+Window* Window::create_window() {
+    static Window _self;
+
+    if (!_self.handle) {
+        _self.init(); 
+    }
+
+    return &_self;
+}
+
+void Window::set_opts(const WindowOpts& new_opts) {
+    opts = new_opts;
+}
+
+void Window::init() {
     LOG("Window Created w: %llu | h: %llu", opts.width, opts.height);
 
     if(!glfwInit()) ERROR("Failed to initialize GLFW!");
@@ -21,6 +44,7 @@ Window::Window(struct WindowOpts& opts) {
     if(!handle) {
         ERROR("Failed to create Window!"); 
         cleanup();
+        return;
     } 
 
     glfwMakeContextCurrent(handle);
@@ -29,20 +53,12 @@ Window::Window(struct WindowOpts& opts) {
     {
         LOG("Failed to load GLAD!");
         cleanup();
+        return;
     }    
    
     glfwSetFramebufferSizeCallback(handle, framebuffer_size_callback);  
 
-    glfwSwapInterval(0);     
-}
-
-Window::~Window() {
-    cleanup();
-}
-
-Window* Window::create_window(struct WindowOpts& opts) {
-    static Window _self(opts);
-    return &_self;
+    glfwSwapInterval(0); 
 }
 
 void Window::toggle_vsync() {
@@ -63,8 +79,10 @@ void Window::poll_events() {
 }
 
 void Window::cleanup() {
-    if(handle) 
+    if(handle) {
         glfwDestroyWindow(handle);
+        handle = nullptr; // important to prevent re-destroy
+    }
 
     glfwTerminate();
     LOG("Window Resources dumped");
@@ -73,3 +91,8 @@ void Window::cleanup() {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }  
+
+bool Window::key_down(int key) {
+    if (!handle) return false;
+    return glfwGetKey(handle, key) == GLFW_PRESS;
+} 

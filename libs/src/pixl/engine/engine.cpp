@@ -6,7 +6,8 @@ Engine::Engine(IAppLogic& applogic)
     : applogic(&applogic) 
 {
     WindowOpts opts;
-    window = Window::create_window(opts);
+    window = Window::create_window();
+    window->set_opts(opts);
     LOG("Engine Created");    
 }
 
