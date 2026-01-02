@@ -3,6 +3,14 @@
 #include "pixl/utility/log.h"
 #include <glad/glad.h>
 
+
+/**
+ *      Simple OpenGL Mesh generator
+ *      @param Mesh 
+ *          mesh object
+ *      
+ *      @returns None
+ */ 
 GLMesh::GLMesh(struct Mesh& mesh) {
 
     if(mesh.vertices.empty()) {
@@ -32,3 +40,4 @@ GLMesh::GLMesh(struct Mesh& mesh) {
     
     mesh.size = mesh.indices.size();
 }
+
