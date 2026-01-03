@@ -3,11 +3,11 @@
 
 #include <pixl/engine/renderer/backend/gl_mesh.h>
 #include <pixl/engine/renderer/backend/gl_shader.h>
-#include "../renderer.h"
+#include "../i_renderer.h"
 
 #include <unordered_map>
 
-class OpenGL : public Renderer {
+class OpenGL : public IRenderer {
     
 private:
     std::unordered_map<u64, GLShader> shaders;

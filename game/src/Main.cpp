@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include <pixl/engine/engine.h>
-#include <pixl/engine/camera.h>
+#include <pixl/engine/core/engine.h>
+#include <pixl/engine/camera/camera.h>
 #include <pixl/engine/renderer/backend/opengl.h>
-#include <pixl/engine/renderer/renderer.h>
+#include <pixl/engine/renderer/i_renderer.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -49,7 +49,7 @@ struct Frustum {
 
 class App : public IAppLogic {
 private:
-    Renderer* renderer = nullptr;           
+    IRenderer* renderer = nullptr;           
     u64 mesh_id = 0;
     u64 shader_id = 0;
     OpenGL opengl;
