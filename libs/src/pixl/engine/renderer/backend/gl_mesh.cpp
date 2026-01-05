@@ -6,9 +6,12 @@
 
 /**
  *      Simple OpenGL Mesh generator
+ * 
+ *      for now its for simple mesh generation no complex model loading yet to be added later. | if the mesh is emtpy it will output a warning instead of halting the engine
+ *      for debugging purposes no textures are allowed for now.
  *      @param Mesh 
  *          mesh object
- *      
+ *          
  *      @returns None
  */ 
 GLMesh::GLMesh(struct Mesh& mesh) {
