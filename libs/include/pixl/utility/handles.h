@@ -7,6 +7,12 @@
 #include "types.h"
 #include "qualifier.h"
 
+/**
+ *      @param Nothing
+ *  
+ *      returns a unique 64 bit unsigned int 
+ *      @return u64
+ */
 PIXL_FUNC_INLINE u64 generate_id() noexcept {
     static std::atomic<u64> counter{1};
     return counter.fetch_add(1, std::memory_order_relaxed);
