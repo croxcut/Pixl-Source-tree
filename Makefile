@@ -1,7 +1,7 @@
 CXX = g++
 CFLAGS = -std=c++17 -O2 -static-libgcc -static-libstdc++
 
-ENGINE_DIR = libs
+ENGINE_DIR = .
 GAME_DIR = game
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
@@ -24,11 +24,9 @@ INCLUDES = -I$(ENGINE_DIR)\
            -I$(IMGUI_DIR) \
            -I$(IMGUI_DIR)/backends
 
-ENGINE_SRC = $(wildcard $(ENGINE_DIR)/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/*/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/*/*/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/*/*/*/*/*.cpp)
+ENGINE_SRC = $(wildcard $(ENGINE_DIR)/core/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/core/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/core/*/*/*.cpp)
 
 GAME_SRC = $(wildcard $(GAME_DIR)/src/*.cpp) \
            $(wildcard $(GAME_DIR)/src/*/*.cpp)
@@ -45,7 +43,7 @@ IMGUI_SRC = $(IMGUI_DIR)/imgui.cpp \
 ENGINE_OBJ = $(patsubst $(ENGINE_DIR)/%.cpp,$(OBJ_DIR)/engine/%.o,$(ENGINE_SRC))
 GAME_OBJ   = $(patsubst $(GAME_DIR)/%.cpp,$(OBJ_DIR)/game/%.o,$(GAME_SRC))
 GLAD_OBJ   = $(patsubst $(GLAD_DIR)/%.c,$(OBJ_DIR)/glad/%.o,$(GLAD_SRC))
-IMGUI_OBJ  = $(patsubst $(IMGUI_DIR)/%.cpp,$(OBJ_DIR)/imgui/%.o,$(IMGUI_SRC))
+IMGUI_OBJ  = $(IMGUI_SRC:$(IMGUI_DIR)/%.cpp=$(OBJ_DIR)/imgui/%.o)
 
 OBJECTS = $(ENGINE_OBJ) $(GAME_OBJ) $(GLAD_OBJ) $(IMGUI_OBJ)
 
