@@ -1,3 +1,6 @@
-./build/
-./game/
-./res/
+# Build artifacts
+build/
+*.o
+*.exe
+game/
+res/
