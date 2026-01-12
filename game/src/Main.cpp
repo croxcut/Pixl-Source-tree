@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
     window->setup_window_config(config);
     window->init();
 
+    // Test
     while(!window->close()) {
         window->poll_events();
         window->refresh();
