@@ -15,7 +15,7 @@ JSON_DIR = dependencies/JSON
 ASSIMP_DIR = dependencies/ASSIMP
 IMGUI_DIR = dependencies/imgui
 
-INCLUDES = -I$(ENGINE_DIR)/include \
+INCLUDES = -I$(ENGINE_DIR)\
            -I$(GLFW_DIR)/include \
            -I$(GLAD_DIR)/include \
            -I$(JSON_DIR)/include \
@@ -24,11 +24,11 @@ INCLUDES = -I$(ENGINE_DIR)/include \
            -I$(IMGUI_DIR) \
            -I$(IMGUI_DIR)/backends
 
-ENGINE_SRC = $(wildcard $(ENGINE_DIR)/src/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/src/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/src/*/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/src/*/*/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/src/*/*/*/*/*.cpp)
+ENGINE_SRC = $(wildcard $(ENGINE_DIR)/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/*/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/*/*/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/*/*/*/*/*.cpp)
 
 GAME_SRC = $(wildcard $(GAME_DIR)/src/*.cpp) \
            $(wildcard $(GAME_DIR)/src/*/*.cpp)
