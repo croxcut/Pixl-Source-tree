@@ -3,12 +3,12 @@
 
 #include "backend/renderer_backend.h"
 
-class GL41MeshLoader {
+class GL41Mesh {
 
 public:
-    GL41MeshLoader(struct Mesh& mesh);
+    GL41Mesh(struct Mesh& mesh);
 
-    
+
 };
 
 #endif

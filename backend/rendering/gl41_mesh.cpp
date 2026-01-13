@@ -1,10 +1,10 @@
-#include "gl41_mesh_loader.h"
+#include "gl41_mesh.h"
 
 #include "misc/utility/log.h"
 
 #include <glad/glad.h>
 
-GL41MeshLoader::GL41MeshLoader(struct Mesh& mesh) {
+GL41Mesh::GL41Mesh(struct Mesh& mesh) {
 
     if(mesh.verticies.empty()) {
         WARN("Vertices are empty: %lld", 
