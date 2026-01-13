@@ -1,7 +1,7 @@
 #include "engine.h"
 
-Engine::Engine() {
-
+Engine::Engine(IAppLogic& applogic) :
+    applogic(&applogic) {
 }
 
 Engine::~Engine() {
@@ -22,14 +22,16 @@ void Engine::init() {
     WindowConfig config;    
     window->setup_window_config(config);
     window->init();
+
+    applogic->init();
 }
 
 void Engine::tick(const f32& dt) {
-
+    applogic->tick(dt);
 }
 
 void Engine::render() {
-
+    applogic->render();
 }
 
 void Engine::run() {
@@ -46,5 +48,5 @@ void Engine::run() {
 }
 
 void Engine::cleanup() {
-
+    applogic->cleanup();
 }

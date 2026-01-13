@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define PIXL_LOGGER_ENABLED
+// #define PIXL_LOGGER_ENABLED
 
 #include "version.h"
 
