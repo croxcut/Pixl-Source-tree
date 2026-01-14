@@ -12,6 +12,7 @@ later down the line when i fixed the re-occuring issues :D*
 
 and also just for my portfolio :D* 
 
+Here is a little sample snipper of the setup :D*
 ```cpp
 
 #include "main/engine.h"        // <-- important include :D*
