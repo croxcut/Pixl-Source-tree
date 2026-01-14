@@ -24,17 +24,15 @@
 #ifndef PXL_RENDERER_H
 #define PXL_RENDERER_H
 
-#include "renderer_backend.h"
+#include "backend/pxL_renderer_backend.h"
 
 class PXLRenderer {
 public:
-
     virtual u64 add_mesh(struct Mesh& mesh) = 0;
     virtual u64 add_shader(struct Shader& shader) = 0;
     virtual void submit_draw_call(const struct DrawCall& draw_call) = 0;
     virtual void draw() = 0;
     virtual void cleanup() = 0;
-
 };
 
 #endif

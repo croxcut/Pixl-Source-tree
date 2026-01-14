@@ -75,7 +75,9 @@ enum class Backend {
 
 class RendererBackend {
 public:
-    virtual void draw() = 0;
+    RendererBackend();
+    ~RendererBackend();
+
 };
 
 #endif

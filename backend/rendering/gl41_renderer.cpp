@@ -130,10 +130,11 @@ void GL41Renderer::draw() {
 
         auto it_shader = gl41_shaders.find(call.shader_id);
         if(it_shader != gl41_shaders.end()) {
-            // it_shader->second.set_mat4("your transform", call.transform);
-
+            // it_shader->second.set_mat4("fuck ass shit transform :D*", call.transform); <--- do this if you're stupid :D*
+            
+            // Much better :D* 
             for(const auto& pair : call.mat4_uniform) {
-                it_shader->second.set_mat4(pair.first.c_str(), pair.second);
+                it_shader->second.set_mat4(pair.first.c_str(), pair.second); 
             }
         }
 
