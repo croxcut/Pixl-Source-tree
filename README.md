@@ -1,4 +1,4 @@
-PIXL ENGINE 0.0.1
+PIXL ENGINE 0.1.0
 
 This project is my hobby project not gonna be a big open source project like godot(obviously)
 
