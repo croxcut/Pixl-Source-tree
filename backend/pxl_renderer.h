@@ -21,23 +21,20 @@
     along with PIXL ENGINE.  If not, see <https://www.gnu.org/licenses/>.
 ==============================================================================*/
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef PXL_RENDERER_H
+#define PXL_RENDERER_H
 
-#include <stdint.h>
-#include <inttypes.h>
+#include "renderer_backend.h"
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
+class PXLRenderer {
+public:
 
-typedef int8_t s8;
-typedef int16_t s16;
-typedef int32_t s32;
-typedef int64_t s64;
+    virtual u64 add_mesh(struct Mesh& mesh) = 0;
+    virtual u64 add_shader(struct Shader& shader) = 0;
+    virtual void submit_draw_call(const struct DrawCall& draw_call) = 0;
+    virtual void draw() = 0;
+    virtual void cleanup() = 0;
 
-typedef float f32;
-typedef double f64;
+};
 
 #endif

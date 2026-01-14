@@ -21,23 +21,19 @@
     along with PIXL ENGINE.  If not, see <https://www.gnu.org/licenses/>.
 ==============================================================================*/
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef GENERATOR_H
+#define GENERATOR_H
 
-#include <stdint.h>
-#include <inttypes.h>
+#include <atomic>
+#include <random>
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
+#include "types.h"
 
-typedef int8_t s8;
-typedef int16_t s16;
-typedef int32_t s32;
-typedef int64_t s64;
-
-typedef float f32;
-typedef double f64;
+namespace Generator{
+    inline u64 generate_id() noexcept {
+        static std::atomic<u64> counter{1};
+        return counter.fetch_add(1, std::memory_order_relaxed);
+    }
+};
 
 #endif

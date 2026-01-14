@@ -21,23 +21,42 @@
     along with PIXL ENGINE.  If not, see <https://www.gnu.org/licenses/>.
 ==============================================================================*/
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef GL41_RENDERER_H
+#define GL41_RENDERER_H
 
-#include <stdint.h>
-#include <inttypes.h>
+#include "backend/pxl_renderer.h"
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
-typedef uint64_t u64;
+#include "backend/rendering/gl41_shader.h"
+#include "backend/rendering/gl41_mesh.h"
 
-typedef int8_t s8;
-typedef int16_t s16;
-typedef int32_t s32;
-typedef int64_t s64;
+class GL41Renderer : public PXLRenderer {
 
-typedef float f32;
-typedef double f64;
+private:
+    
+    std::unordered_map<u64, GL41Shader> gl41_shaders;
+    std::unordered_map<u64, Mesh> gl41_meshes;
+
+    u32 bound_vao = 0;
+    std::vector<u32> bound_textures;
+    u64 current_shader = 0;
+
+    std::vector<struct DrawCall> draw_queue;
+
+public:
+    GL41Renderer();
+    ~GL41Renderer();
+
+    u64 add_mesh(struct Mesh& mesh) override;
+    u64 add_shader(struct Shader& shader) override;
+    void submit_draw_call(const struct DrawCall& draw_call) override;
+    void draw() override;
+    void cleanup() override;
+
+private:
+
+    void draw_mesh(const u64& mesh_id);
+    void use_shader(const u64& shader_id);
+
+};
 
 #endif
