@@ -46,3 +46,7 @@ int main() {
 }
 
 ```
+
+see how stupid that is? :D* for real. only insane people will use this if they want to
+
+are you insane??...
