@@ -26,12 +26,11 @@ INCLUDES = -I$(ENGINE_DIR)\
 
 ENGINE_SRC = $(wildcard $(ENGINE_DIR)/core/*.cpp) \
              $(wildcard $(ENGINE_DIR)/core/*/*.cpp) \
+             $(wildcard $(ENGINE_DIR)/core/*/*/*.cpp) \
              $(wildcard $(ENGINE_DIR)/main/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/main/*/*.cpp) \
-             $(wildcard $(ENGINE_DIR)/core/*/*/*.cpp)
-
-GAME_SRC = $(wildcard $(GAME_DIR)/src/*.cpp) \
-           $(wildcard $(GAME_DIR)/src/*/*.cpp)
+             
+GAME_SRC = $(wildcard $(GAME_DIR)/*.cpp) \
+           $(wildcard $(GAME_DIR)/*/*.cpp)
 
 GLAD_SRC = $(GLAD_DIR)/src/glad.c
 
