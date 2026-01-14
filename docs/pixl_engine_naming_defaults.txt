@@ -1,0 +1,16 @@
+
+@author @2026 John Paul Valenzuela
+
+Standard pixl naming conventions:
+
+use snake cases for instances but keep the normal camel case for the object:
+
+    (sample)                    <Object> instance_1
+    (project sample)            GL41Renderer gl41_renderer
+
+use full descriptive function names dont't simplify all things:
+
+    (sample)                    <return value> <function name>
+    (project sample)            int get_entity_uniform();
+
+
