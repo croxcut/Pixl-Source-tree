@@ -12,6 +12,8 @@ later down the line when i fixed the re-occuring issues :D*
 
 and also just for my portfolio :D* 
 
+for now supported rendering API is just OpengGL 4.1 (vulkan will be added later down the line :)*)
+
 Here is a little sample snippet of the setup :D*
 ```cpp
 
