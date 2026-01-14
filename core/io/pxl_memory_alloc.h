@@ -25,7 +25,6 @@
 #define PXL_MEMORY_ALLOC_H
 
 #include <cstddef>
-#include <mutex>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -34,26 +33,8 @@
 #include <sys/mman.h>
 #endif
 
-struct block {
-    size_t size;
-    bool is_free;
-    block* next;
-};
-
-struct slab {
-    char* memory;
-    size_t size;
-    block* blocks;
-    slab* next;
-};
-
-struct block_header {
-    size_t size;
-    bool is_large;
-};
-
 void* px_malloc(size_t size);
 void px_free(void* ptr);
 void* px_realloc(void* ptr, size_t new_size);
 
-#endif
+#endif 
