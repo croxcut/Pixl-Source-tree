@@ -21,13 +21,22 @@
     along with PIXL ENGINE.  If not, see <https://www.gnu.org/licenses/>.
 ==============================================================================*/
 
-#ifndef PXL_MEMORY_ALLOC_H
-#define PXL_MEMORY_ALLOC_H
+#ifndef PXL_MEMORY_H
+#define PXL_MEMORY_H
 
 #include <cstddef>
 
-void* px_malloc(size_t size);
-void  px_free(void* ptr);
-void* px_realloc(void* ptr, size_t new_size);
+namespace px {
+
+void* malloc(size_t size);
+void  free(void* ptr);
+void* realloc(void* ptr, size_t size);
+
+void  frame_begin();
+void* frame_alloc(size_t size);
+
+void  dump_memory_stats();
+
+}
 
 #endif

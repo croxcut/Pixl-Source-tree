@@ -21,13 +21,30 @@
     along with PIXL ENGINE.  If not, see <https://www.gnu.org/licenses/>.
 ==============================================================================*/
 
-#ifndef PXL_MEMORY_ALLOC_H
-#define PXL_MEMORY_ALLOC_H
+#include "pxl_arena.h"
+#include "pxl_memory.h"
 
-#include <cstddef>
+namespace px {
 
-void* px_malloc(size_t size);
-void  px_free(void* ptr);
-void* px_realloc(void* ptr, size_t new_size);
+arena* create_arena(size_t size) {
+    arena* a = (arena*)malloc(sizeof(arena));
+    a->base = (char*)malloc(size);
+    a->size = size;
+    a->offset = 0;
+    return a;
+}
 
-#endif
+void* arena_alloc(arena* a, size_t size) {
+    size = (size + 15) & ~15;
+    if (a->offset + size > a->size)
+        return nullptr;
+    void* p = a->base + a->offset;
+    a->offset += size;
+    return p;
+}
+
+void arena_reset(arena* a) {
+    a->offset = 0;
+}
+
+}

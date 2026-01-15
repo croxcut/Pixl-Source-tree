@@ -22,56 +22,25 @@
 ==============================================================================*/
 
 #include "pxl_memory_alloc.h"
-#include <mutex>
-#include <thread>
-#include <atomic>
+
+#include <cstdint>
 #include <cstring>
 
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <sys/mman.h>
+    #include <unistd.h>
+#endif
+
 constexpr size_t ALIGNMENT   = 16;
+constexpr size_t SLAB_SIZE   = 64 * 1024;
 constexpr size_t NUM_CLASSES = 5;
-constexpr size_t SLAB_SIZE   = 64 * 1024; 
-constexpr size_t SIZE_CLASSES[NUM_CLASSES] = {32, 64, 128, 256, 512};
-
-struct block {
-    size_t size;
-    bool is_free;
-    block* next_free; 
+constexpr size_t SIZE_CLASSES[NUM_CLASSES] = {
+    32, 64, 128, 256, 512
 };
 
-struct slab {
-    char* memory;
-    size_t size;
-    size_t block_size;
-    block* free_list;  
-    slab* next;
-    std::mutex lock;   
-    size_t free_count; 
-};
-
-struct block_header {
-    size_t size;
-    bool is_large;
-};
-
-thread_local slab* slab_lists[NUM_CLASSES] = {nullptr};
-
-inline size_t align_size(size_t size) {
-    return (size + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1);
-}
-
-inline void* align_pointer(void* ptr, size_t alignment) {
-    uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
-    size_t offset = (alignment - (p % alignment)) % alignment;
-    return reinterpret_cast<void*>(p + offset);
-}
-
-inline size_t get_class_index(size_t size) {
-    for (size_t i = 0; i < NUM_CLASSES; ++i)
-        if (size <= SIZE_CLASSES[i]) return i;
-    return NUM_CLASSES; 
-}
-
-inline void* os_alloc(size_t size) {
+static void* os_alloc(size_t size) {
 #ifdef _WIN32
     return VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
@@ -81,120 +50,166 @@ inline void* os_alloc(size_t size) {
 #endif
 }
 
-inline void os_free(void* ptr, size_t size) {
+static void os_free(void* ptr, size_t size) {
 #ifdef _WIN32
+    (void)size;
     VirtualFree(ptr, 0, MEM_RELEASE);
 #else
     munmap(ptr, size);
 #endif
 }
 
-static slab* create_slab(size_t class_index) {
-    size_t block_size = SIZE_CLASSES[class_index];
-    char* slab_mem = (char*)os_alloc(SLAB_SIZE);
-    if (!slab_mem) return nullptr;
-
-    slab* new_slab = new slab{slab_mem, SLAB_SIZE, block_size, nullptr, nullptr, {}, 0};
-
-    size_t num_blocks = SLAB_SIZE / (block_size + sizeof(block));
-    char* ptr = slab_mem;
-    for (size_t i = 0; i < num_blocks; ++i) {
-        block* blk = (block*)ptr;
-        blk->size = block_size;
-        blk->is_free = true;
-        blk->next_free = new_slab->free_list;
-        new_slab->free_list = blk;
-        ++new_slab->free_count;
-        ptr += sizeof(block) + block_size;
-    }
-
-    new_slab->next = slab_lists[class_index];
-    slab_lists[class_index] = new_slab;
-
-    return new_slab;
+static inline size_t align_up(size_t v, size_t a) {
+    return (v + (a - 1)) & ~(a - 1);
 }
 
-static block* allocate_from_slab(size_t class_index) {
-    slab* slab_ptr = slab_lists[class_index];
-    while (slab_ptr) {
-        std::lock_guard<std::mutex> lock(slab_ptr->lock);
-        if (slab_ptr->free_list) {
-            block* blk = slab_ptr->free_list;
-            slab_ptr->free_list = blk->next_free;
-            blk->is_free = false;
-            --slab_ptr->free_count;
-            return blk;
-        }
-        slab_ptr = slab_ptr->next;
+static inline size_t get_class_index(size_t size) {
+    for (size_t i = 0; i < NUM_CLASSES; ++i)
+        if (size <= SIZE_CLASSES[i])
+            return i;
+    return NUM_CLASSES;
+}
+
+struct px_slab;
+
+struct alignas(ALIGNMENT) px_header {
+    size_t   size;
+    bool     is_large;
+    uint8_t  class_index;
+    px_slab* owner;
+};
+
+struct px_block {
+    px_header header;
+    px_block* next;
+};
+
+struct px_slab {
+    void*     memory;
+    px_block* free_list;
+    size_t    block_size;
+    size_t    total_blocks;
+    size_t    free_blocks;
+    px_slab*  next;
+};
+
+thread_local px_slab* slab_lists[NUM_CLASSES] = { nullptr };
+
+static px_slab* create_slab(size_t class_index) {
+    const size_t user_size  = SIZE_CLASSES[class_index];
+    const size_t block_size = align_up(sizeof(px_block) + user_size, ALIGNMENT);
+
+    void* mem = os_alloc(SLAB_SIZE);
+    if (!mem) return nullptr;
+
+    px_slab* slab = (px_slab*)os_alloc(sizeof(px_slab));
+    if (!slab) {
+        os_free(mem, SLAB_SIZE);
+        return nullptr;
     }
 
-    slab_ptr = create_slab(class_index);
-    if (!slab_ptr) return nullptr;
+    slab->memory       = mem;
+    slab->block_size   = block_size;
+    slab->free_list    = nullptr;
+    slab->next         = nullptr;
+    slab->total_blocks = SLAB_SIZE / block_size;
+    slab->free_blocks  = slab->total_blocks;
 
-    std::lock_guard<std::mutex> lock(slab_ptr->lock);
-    block* blk = slab_ptr->free_list;
-    slab_ptr->free_list = blk->next_free;
-    blk->is_free = false;
-    --slab_ptr->free_count;
+    char* ptr = (char*)mem;
+    for (size_t i = 0; i < slab->total_blocks; ++i) {
+        px_block* blk = (px_block*)ptr;
+        blk->next = slab->free_list;
+        slab->free_list = blk;
+        ptr += block_size;
+    }
+
+    slab->next = slab_lists[class_index];
+    slab_lists[class_index] = slab;
+
+    return slab;
+}
+
+static px_block* slab_alloc(size_t class_index) {
+    px_slab* slab = slab_lists[class_index];
+
+    while (slab) {
+        if (slab->free_list) {
+            px_block* blk = slab->free_list;
+            slab->free_list = blk->next;
+            slab->free_blocks--;
+            return blk;
+        }
+        slab = slab->next;
+    }
+
+    slab = create_slab(class_index);
+    if (!slab) return nullptr;
+
+    px_block* blk = slab->free_list;
+    slab->free_list = blk->next;
+    slab->free_blocks--;
     return blk;
 }
 
 void* px_malloc(size_t size) {
     if (size == 0) return nullptr;
-    size = align_size(size);
 
+    size = align_up(size, ALIGNMENT);
     size_t class_index = get_class_index(size);
 
+    // ---- SMALL ----
     if (class_index < NUM_CLASSES) {
-        block* blk = allocate_from_slab(class_index);
+        px_block* blk = slab_alloc(class_index);
         if (!blk) return nullptr;
-        return align_pointer((char*)blk + sizeof(block), ALIGNMENT);
+
+        blk->header.size        = size;
+        blk->header.is_large    = false;
+        blk->header.class_index = (uint8_t)class_index;
+        blk->header.owner       = (px_slab*)slab_lists[class_index];
+
+        return (void*)(blk + 1);
     }
 
-    size_t total = sizeof(block_header) + size;
-    block_header* hdr = (block_header*)os_alloc(total);
+    size_t total = sizeof(px_header) + size;
+    px_header* hdr = (px_header*)os_alloc(total);
     if (!hdr) return nullptr;
-    hdr->size = size;
+
+    hdr->size     = size;
     hdr->is_large = true;
-    return (char*)hdr + sizeof(block_header);
+    hdr->owner    = nullptr;
+
+    return (void*)(hdr + 1);
 }
 
 void px_free(void* ptr) {
     if (!ptr) return;
 
-    char* cptr = (char*)ptr;
-    block_header* hdr = (block_header*)(cptr - sizeof(block_header));
+    px_header* hdr = ((px_header*)ptr) - 1;
 
     if (hdr->is_large) {
-        os_free(hdr, hdr->size + sizeof(block_header));
+        os_free(hdr, hdr->size + sizeof(px_header));
         return;
     }
 
-    block* blk = (block*)(cptr - sizeof(block));
+    px_block* blk = (px_block*)hdr;
+    px_slab* slab = hdr->owner;
 
-    blk->is_free = true;
+    blk->next = slab->free_list;
+    slab->free_list = blk;
+    slab->free_blocks++;
 
-    for (size_t i = 0; i < NUM_CLASSES; ++i) {
-        slab* s = slab_lists[i];
-        while (s) {
-            if ((char*)blk >= s->memory && (char*)blk < s->memory + s->size) {
-                std::lock_guard<std::mutex> lock(s->lock);
-                blk->next_free = s->free_list;
-                s->free_list = blk;
-                ++s->free_count;
+    if (slab->free_blocks == slab->total_blocks) {
+        size_t ci = hdr->class_index;
+        px_slab** prev = &slab_lists[ci];
 
-                size_t num_blocks = s->size / (s->block_size + sizeof(block));
-                if (s->free_count == num_blocks) {
-                    slab** prev = &slab_lists[i];
-                    while (*prev && *prev != s) prev = &(*prev)->next;
-                    if (*prev) *prev = s->next;
-                    os_free(s->memory, s->size);
-                    delete s;
-                }
-                return;
-            }
-            s = s->next;
-        }
+        while (*prev && *prev != slab)
+            prev = &(*prev)->next;
+
+        if (*prev)
+            *prev = slab->next;
+
+        os_free(slab->memory, SLAB_SIZE);
+        os_free(slab, sizeof(px_slab));
     }
 }
 
@@ -205,24 +220,16 @@ void* px_realloc(void* ptr, size_t new_size) {
         return nullptr;
     }
 
-    char* cptr = (char*)ptr;
-    block_header* hdr = (block_header*)(cptr - sizeof(block_header));
+    px_header* hdr = ((px_header*)ptr) - 1;
 
-    if (hdr->is_large) {
-        if (hdr->size >= new_size) return ptr;
-        void* new_ptr = px_malloc(new_size);
-        if (!new_ptr) return nullptr;
-        std::memcpy(new_ptr, ptr, hdr->size);
-        px_free(ptr);
-        return new_ptr;
-    }
-
-    block* blk = (block*)(cptr - sizeof(block));
-    if (blk->size >= new_size) return ptr; 
+    if (hdr->size >= new_size)
+        return ptr;
 
     void* new_ptr = px_malloc(new_size);
     if (!new_ptr) return nullptr;
-    std::memcpy(new_ptr, ptr, blk->size);
+
+    std::memcpy(new_ptr, ptr, hdr->size);
     px_free(ptr);
+
     return new_ptr;
 }

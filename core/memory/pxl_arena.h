@@ -21,13 +21,23 @@
     along with PIXL ENGINE.  If not, see <https://www.gnu.org/licenses/>.
 ==============================================================================*/
 
-#ifndef PXL_MEMORY_ALLOC_H
-#define PXL_MEMORY_ALLOC_H
+#ifndef PXL_ARENA_H
+#define PXL_ARENA_H
 
 #include <cstddef>
 
-void* px_malloc(size_t size);
-void  px_free(void* ptr);
-void* px_realloc(void* ptr, size_t new_size);
+namespace px {
+
+struct arena {
+    char* base;
+    size_t size;
+    size_t offset;
+};
+
+arena* create_arena(size_t size);
+void*  arena_alloc(arena* a, size_t size);
+void   arena_reset(arena* a);
+
+}
 
 #endif
