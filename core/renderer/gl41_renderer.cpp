@@ -44,7 +44,7 @@ GL41Renderer::~GL41Renderer() {
 u64 GL41Renderer::add_mesh(struct Mesh& mesh) {
     if(mesh.verticies.empty()) return -1;
 
-    GL41Mesh gl41_mesh(mesh);
+    GL41Mesh::create(mesh);
     u64 mesh_id = Generator::generate_id();
 
     gl41_meshes.emplace(mesh_id, std::move(mesh));
@@ -59,7 +59,7 @@ u64 GL41Renderer::add_shader(struct Shader& shader) {
 
     u64 shader_id = Generator::generate_id();
 
-    gl41_shaders.emplace(shader_id, std::move(shader));
+    gl41_shaders.emplace(shader_id, std::move(gl41_shader));
 
     return shader_id;
 }

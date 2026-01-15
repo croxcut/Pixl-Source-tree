@@ -26,40 +26,33 @@
 *                                                                                * 
 **********************************************************************************/
 
-#include "gl41_mesh.h"
+#ifndef GL41_SHADER_LOADER_H
+#define GL41_SHADER_LOADER_H
 
-#include "misc/utility/log.h"
+#include "misc/utility/types.h"
+#include "pxL_renderer_backend.h"
 
 #include <glad/glad.h>
 
-GL41Mesh::GL41Mesh(struct Mesh& mesh) {
+class GL41Shader {
 
-    if(mesh.verticies.empty()) {
-        WARN("Vertices are empty: %lld", 
-            mesh.verticies.size());
-        return;
-    }
+private:
+    u32 vertex;
+    u32 fragment;
+    u32 program;
 
-    glGenVertexArrays(1,&mesh.vao);
-    glBindVertexArray(mesh.vao);
+public:
+    GL41Shader(struct Shader& shader);
 
-    glGenBuffers(1, &mesh.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh.verticies.size() * sizeof(Vertex), mesh.verticies.data(), GL_STATIC_DRAW);
+    void use();
+    void clear();
+    void set_mat4(const char* uniform, const glm::mat4& mat);
 
-    glGenBuffers(1, &mesh.ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(u32), mesh.indices.data(), GL_STATIC_DRAW);
+private:
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-    glEnableVertexAttribArray(0);
+    u32 compile(const char* source, GLenum type);
+    u32 create_program(const u32& vertex, const u32& fragment);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (3 * sizeof(f32)));
-    glEnableVertexAttribArray(1);
+};
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (6 * sizeof(f32)));
-    glEnableVertexAttribArray(2);
-
-    mesh.size = mesh.indices.size();
-}
-
+#endif

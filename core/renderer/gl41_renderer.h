@@ -26,18 +26,42 @@
 *                                                                                * 
 **********************************************************************************/
 
-#ifndef PXL_RENDERER_H
-#define PXL_RENDERER_H
+#ifndef GL41_RENDERER_H
+#define GL41_RENDERER_H
 
-#include "backend/pxL_renderer_backend.h"
+#include "pxl_renderer.h"
 
-class PXLRenderer {
+#include "gl41_shader.h"
+#include "gl41_mesh.h"
+
+class GL41Renderer : public PXLRenderer {
+
+private:
+    
+    std::unordered_map<u64, GL41Shader> gl41_shaders;
+    std::unordered_map<u64, Mesh> gl41_meshes;
+
+    u32 bound_vao = 0;
+    std::vector<u32> bound_textures;
+    u64 current_shader = 0;
+
+    std::vector<struct DrawCall> draw_queue;
+
 public:
-    virtual u64 add_mesh(struct Mesh& mesh) = 0;
-    virtual u64 add_shader(struct Shader& shader) = 0;
-    virtual void submit_draw_call(const struct DrawCall& draw_call) = 0;
-    virtual void draw() = 0;
-    virtual void cleanup() = 0;
+    GL41Renderer();
+    ~GL41Renderer();
+
+    u64 add_mesh(struct Mesh& mesh) override;
+    u64 add_shader(struct Shader& shader) override;
+    void submit_draw_call(const struct DrawCall& draw_call) override;
+    void draw() override;
+    void cleanup() override;
+
+private:
+
+    void draw_mesh(const u64& mesh_id);
+    void use_shader(const u64& shader_id);
+
 };
 
 #endif

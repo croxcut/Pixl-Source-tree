@@ -79,7 +79,7 @@ namespace px {
 
         void initTable(Entry* t, size_t cap) {
             for (size_t i = 0; i < cap; i++)
-                new (&t[i]) Entry(); // placement new
+                new (&t[i]) Entry(); 
         }
 
         size_t findIndex(const Key& key) const {
