@@ -36,11 +36,24 @@ namespace px {
     void* malloc(size_t size);
     void  free(void* ptr);
     void* realloc(void* ptr, size_t size);
+    void* calloc(size_t num, size_t size);
 
-    void  frame_begin();
-    void* frame_alloc(size_t size);
+    void* memalign(size_t alignment, size_t size);
+    void  aligned_free(void* ptr);
+
+    char* strdup(const char* s);
+
+    // void  frame_begin();
+    // void* frame_alloc(size_t size);
 
     void  dump_memory_stats();
+
+    // inline void* px_malloc(size_t size) { return malloc(size); }
+    // inline void  px_free(void* ptr) { free(ptr); }
+    // inline void* px_realloc(void* ptr, size_t size) { return realloc(ptr, size); }
+    // inline void* px_calloc(size_t n, size_t s) { return calloc(n, s); }
+    // inline void* px_memalign(size_t alignment, size_t size) { return memalign(alignment, size); }
+    // inline void  px_aligned_free(void* ptr) { aligned_free(ptr); }
 
 }
 
