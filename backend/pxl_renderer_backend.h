@@ -79,6 +79,9 @@ enum class Backend {
 };
 
 class RendererBackend {
+
+public:
+
 public:
     RendererBackend();
     ~RendererBackend();
