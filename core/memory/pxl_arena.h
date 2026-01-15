@@ -28,15 +28,15 @@
 
 namespace px {
 
-struct arena {
-    char* base;
-    size_t size;
-    size_t offset;
-};
+    struct arena {
+        char* base;
+        size_t size;
+        size_t offset;
+    };
 
-arena* create_arena(size_t size);
-void*  arena_alloc(arena* a, size_t size);
-void   arena_reset(arena* a);
+    arena* create_arena(size_t size);
+    void*  arena_alloc(arena* a, size_t size);
+    void   arena_reset(arena* a);
 
 }
 

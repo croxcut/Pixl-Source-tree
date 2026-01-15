@@ -26,25 +26,25 @@
 
 namespace px {
 
-arena* create_arena(size_t size) {
-    arena* a = (arena*)malloc(sizeof(arena));
-    a->base = (char*)malloc(size);
-    a->size = size;
-    a->offset = 0;
-    return a;
-}
+    arena* create_arena(size_t size) {
+        arena* a = (arena*)malloc(sizeof(arena));
+        a->base = (char*)malloc(size);
+        a->size = size;
+        a->offset = 0;
+        return a;
+    }
 
-void* arena_alloc(arena* a, size_t size) {
-    size = (size + 15) & ~15;
-    if (a->offset + size > a->size)
-        return nullptr;
-    void* p = a->base + a->offset;
-    a->offset += size;
-    return p;
-}
+    void* arena_alloc(arena* a, size_t size) {
+        size = (size + 15) & ~15;
+        if (a->offset + size > a->size)
+            return nullptr;
+        void* p = a->base + a->offset;
+        a->offset += size;
+        return p;
+    }
 
-void arena_reset(arena* a) {
-    a->offset = 0;
-}
+    void arena_reset(arena* a) {
+        a->offset = 0;
+    }
 
 }

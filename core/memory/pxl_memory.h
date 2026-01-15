@@ -28,14 +28,14 @@
 
 namespace px {
 
-void* malloc(size_t size);
-void  free(void* ptr);
-void* realloc(void* ptr, size_t size);
+    void* malloc(size_t size);
+    void  free(void* ptr);
+    void* realloc(void* ptr, size_t size);
 
-void  frame_begin();
-void* frame_alloc(size_t size);
+    void  frame_begin();
+    void* frame_alloc(size_t size);
 
-void  dump_memory_stats();
+    void  dump_memory_stats();
 
 }
 
