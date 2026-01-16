@@ -2,7 +2,7 @@
 *                                                                                *
 *                                PIXL ENGINE                                     *
 *                                                                                *
-*  Copyright (c) 2025-present John Paul Valenzuela                               *
+*  Copyright (c) 2025-present John Paul Valenzuela                                 *
 *                                                                                *
 *  MIT License                                                                   *
 *                                                                                *
@@ -23,16 +23,15 @@
 *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, *
 *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN     *
 *  THE SOFTWARE.                                                                 *
-*                                                                                * 
+*                                                                                *
 **********************************************************************************/
 
 #include "pxl_memory.h"
-
 #include <atomic>
-#include <cstdint>
 #include <cstddef>
-#include <cstring>
+#include <cstdint>
 #include <cstdio>
+#include <cstring>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -43,10 +42,17 @@
 
 namespace px {
 
-constexpr size_t ALIGNMENT   = 16;
-constexpr size_t SLAB_SIZE   = 64 * 1024;
-constexpr size_t NUM_CLASSES = 5;
-constexpr size_t SIZE_CLASSES[NUM_CLASSES] = {32, 64, 128, 256, 512};
+constexpr size_t ALIGNMENT        = 16;
+constexpr size_t SLAB_SIZE        = 64 * 1024;
+constexpr size_t FAST_FREE_LIMIT  = 32;
+constexpr size_t NUM_CLASSES      = 5;
+constexpr size_t SIZE_CLASSES[NUM_CLASSES] = {
+    32, 64, 128, 256, 512
+};
+
+#ifdef PXL_DEBUG
+constexpr uint32_t CANARY_VALUE = 0xDEADC0DE;
+#endif
 
 struct MemoryStats {
     std::atomic<size_t> user_allocated{0};
@@ -58,8 +64,38 @@ struct MemoryStats {
 
 static MemoryStats g_stats;
 
-static inline size_t align_up(size_t size, size_t alignment = ALIGNMENT) {
-    return (size + (alignment - 1)) & ~(alignment - 1);
+struct slab;
+
+struct header {
+    size_t size;
+    slab* owner;
+    bool large;
+#ifdef PXL_DEBUG
+    uint32_t canary;
+#endif
+};
+
+struct block {
+    block* next;
+};
+
+struct slab {
+    block* free_list;
+    std::atomic<block*> remote_free;
+    std::atomic<size_t> remote_count;
+    size_t total;
+    size_t free;
+    size_t block_size;
+    slab* next;
+    uint64_t owner_thread;
+};
+
+thread_local slab* slabs[NUM_CLASSES] = { nullptr };
+thread_local block* fast_free[NUM_CLASSES] = { nullptr };
+thread_local size_t fast_free_count[NUM_CLASSES] = { 0 };
+
+static inline size_t align_up(size_t v, size_t a = ALIGNMENT) {
+    return (v + (a - 1)) & ~(a - 1);
 }
 
 static inline uint64_t thread_id() {
@@ -74,75 +110,45 @@ static void* os_alloc(size_t size) {
 #ifdef _WIN32
     void* p = VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
-    void* p = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void* p = mmap(nullptr, size, PROT_READ | PROT_WRITE,
+                   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (p == MAP_FAILED) p = nullptr;
 #endif
     if (p) g_stats.os_allocated.fetch_add(size, std::memory_order_relaxed);
     return p;
 }
 
-static void os_free(void* ptr, size_t size) {
-    if (!ptr) return;
+static void os_free(void* p, size_t size) {
+    if (!p) return;
 #ifdef _WIN32
     (void)size;
-    VirtualFree(ptr, 0, MEM_RELEASE);
+    VirtualFree(p, 0, MEM_RELEASE);
 #else
-    munmap(ptr, size);
+    munmap(p, size);
 #endif
     g_stats.os_freed.fetch_add(size, std::memory_order_relaxed);
 }
 
-struct slab;
-
-struct header {
-    size_t size;
-    bool large;
-#ifdef PXL_DEBUG
-    uint32_t canary;
-#endif
-};
-
-struct block {
-    block* next;
-};
-
-struct slab {
-    void* memory;
-    block* free_list;
-    std::atomic<block*> remote_free;
-    std::atomic<size_t> remote_count{0};
-    size_t total;
-    size_t free;
-    slab* next;
-    uint64_t owner_thread;
-    std::atomic<bool> eligible_for_reclaim{false};
-};
-
-thread_local slab* slabs[NUM_CLASSES] = {nullptr};
-thread_local block* fast_free[NUM_CLASSES] = {nullptr};
-thread_local size_t alloc_count[NUM_CLASSES] = {0};
-
 static slab* create_slab(size_t ci) {
-    size_t block_size = align_up(SIZE_CLASSES[ci] + sizeof(header));
-    size_t count = SLAB_SIZE / block_size;
+    size_t block_size = align_up(sizeof(header) + SIZE_CLASSES[ci]);
+    size_t usable     = SLAB_SIZE - align_up(sizeof(slab));
+    size_t count      = usable / block_size;
 
     void* mem = os_alloc(SLAB_SIZE);
     if (!mem) return nullptr;
 
-    slab* s = (slab*)os_alloc(sizeof(slab));
-    if (!s) { os_free(mem, SLAB_SIZE); return nullptr; }
-
-    s->memory = mem;
-    s->free_list = nullptr;
+    slab* s = new (mem) slab{};
+    s->block_size   = block_size;
+    s->total        = count;
+    s->free         = count;
+    s->owner_thread = thread_id();
     s->remote_free.store(nullptr, std::memory_order_relaxed);
     s->remote_count.store(0, std::memory_order_relaxed);
-    s->total = count;
-    s->free = count;
-    s->owner_thread = thread_id();
-    s->eligible_for_reclaim.store(false, std::memory_order_relaxed);
 
-    char* p = (char*)mem;
-    for (size_t i = 0; i < count; ++i) {
+    char* p = (char*)mem + align_up(sizeof(slab));
+    s->free_list = nullptr;
+
+    for (size_t i = 0; i < count; i++) {
         block* b = (block*)p;
         b->next = s->free_list;
         s->free_list = b;
@@ -154,8 +160,9 @@ static slab* create_slab(size_t ci) {
     return s;
 }
 
-static inline void drain_remote(slab* s) {
+static void drain_remote(slab* s) {
     if (s->remote_count.load(std::memory_order_acquire) == 0) return;
+
     block* head = s->remote_free.exchange(nullptr, std::memory_order_acq_rel);
     s->remote_count.store(0, std::memory_order_release);
 
@@ -168,66 +175,59 @@ static inline void drain_remote(slab* s) {
     }
 }
 
-static void sweep_slabs(size_t ci) {
-    slab* prev = nullptr;
-    slab* s = slabs[ci];
-    while (s) {
-        drain_remote(s);
-        slab* next = s->next;
-        if (s->eligible_for_reclaim.load(std::memory_order_acquire) && s->free == s->total) {
-            if (prev) prev->next = next; else slabs[ci] = next;
-            os_free(s->memory, SLAB_SIZE);
-            os_free(s, sizeof(slab));
-        } else {
-            prev = s;
-        }
-        s = next;
-    }
-}
-
 void* malloc(size_t size) {
     if (size == 0) return nullptr;
     size = align_up(size);
 
     size_t ci = NUM_CLASSES;
-    for (size_t i = 0; i < NUM_CLASSES; ++i) if (size <= SIZE_CLASSES[i]) { ci = i; break; }
+    for (size_t i = 0; i < NUM_CLASSES; i++) {
+        if (size <= SIZE_CLASSES[i]) {
+            ci = i;
+            break;
+        }
+    }
 
     if (ci < NUM_CLASSES) {
         if (fast_free[ci]) {
             block* b = fast_free[ci];
             fast_free[ci] = b->next;
+            fast_free_count[ci]--;
 
             header* h = (header*)b;
-            h->size = size;
+            h->size  = size;
             h->large = false;
+
 #ifdef PXL_DEBUG
-            h->canary = 0xDEADC0DE;
+            h->canary = CANARY_VALUE;
 #endif
-            g_stats.user_allocated.fetch_add(size, std::memory_order_relaxed);
-            g_stats.active_allocs.fetch_add(1, std::memory_order_relaxed);
+            g_stats.user_allocated.fetch_add(size);
+            g_stats.active_allocs.fetch_add(1);
             return (void*)(h + 1);
         }
 
         slab* s = slabs[ci];
-        while (s) { drain_remote(s); if (s->free_list) break; s = s->next; }
-        if (!s && !(s = create_slab(ci))) return nullptr;
+        while (s) {
+            drain_remote(s);
+            if (s->free_list) break;
+            s = s->next;
+        }
+
+        if (!s) s = create_slab(ci);
+        if (!s) return nullptr;
 
         block* b = s->free_list;
         s->free_list = b->next;
         s->free--;
 
         header* h = (header*)b;
-        h->size = size;
+        h->size  = size;
+        h->owner = s;
         h->large = false;
 #ifdef PXL_DEBUG
-        h->canary = 0xDEADC0DE;
+        h->canary = CANARY_VALUE;
 #endif
-        g_stats.user_allocated.fetch_add(size, std::memory_order_relaxed);
-        g_stats.active_allocs.fetch_add(1, std::memory_order_relaxed);
-
-        alloc_count[ci]++;
-        if (alloc_count[ci] >= 64) { sweep_slabs(ci); alloc_count[ci] = 0; }
-
+        g_stats.user_allocated.fetch_add(size);
+        g_stats.active_allocs.fetch_add(1);
         return (void*)(h + 1);
     }
 
@@ -235,120 +235,100 @@ void* malloc(size_t size) {
     header* h = (header*)os_alloc(total);
     if (!h) return nullptr;
 
-    h->size = size;
+    h->size  = size;
+    h->owner = nullptr;
     h->large = true;
 #ifdef PXL_DEBUG
-    h->canary = 0xDEADC0DE;
+    h->canary = CANARY_VALUE;
 #endif
-    g_stats.user_allocated.fetch_add(size, std::memory_order_relaxed);
-    g_stats.active_allocs.fetch_add(1, std::memory_order_relaxed);
-
+    g_stats.user_allocated.fetch_add(size);
+    g_stats.active_allocs.fetch_add(1);
     return (void*)(h + 1);
 }
 
 void free(void* ptr) {
     if (!ptr) return;
-
     header* h = ((header*)ptr) - 1;
 
 #ifdef PXL_DEBUG
-    if (h->canary != 0xDEADC0DE) __debugbreak();
+    if (h->canary != CANARY_VALUE) {
+        std::abort();
+    }
+    std::memset(ptr, 0xDD, h->size);
 #endif
 
-    g_stats.user_freed.fetch_add(h->size, std::memory_order_relaxed);
-    g_stats.active_allocs.fetch_sub(1, std::memory_order_relaxed);
+    g_stats.user_freed.fetch_add(h->size);
+    g_stats.active_allocs.fetch_sub(1);
 
     if (h->large) {
         os_free(h, align_up(h->size + sizeof(header), 4096));
         return;
     }
 
+    slab* s = h->owner;
     block* b = (block*)h;
 
-    size_t ci = NUM_CLASSES;
-    for (size_t i = 0; i < NUM_CLASSES; ++i) if (h->size <= SIZE_CLASSES[i]) { ci = i; break; }
-    if (ci == NUM_CLASSES) return;
+    if (s->owner_thread != thread_id()) {
+        block* old = s->remote_free.load(std::memory_order_relaxed);
+        do {
+            b->next = old;
+        } while (!s->remote_free.compare_exchange_weak(
+            old, b, std::memory_order_release, std::memory_order_relaxed));
+        s->remote_count.fetch_add(1);
+        return;
+    }
 
-    size_t count = 0;
-    block* it = fast_free[ci];
-    while (it) { it = it->next; count++; }
-    if (count < 32) { b->next = fast_free[ci]; fast_free[ci] = b; return; }
+    if (fast_free_count[s->block_size <= 32 ? 0 :
+                         s->block_size <= 64 ? 1 :
+                         s->block_size <= 128 ? 2 :
+                         s->block_size <= 256 ? 3 : 4] < FAST_FREE_LIMIT) {
+        size_t ci =
+            s->block_size <= 32  ? 0 :
+            s->block_size <= 64  ? 1 :
+            s->block_size <= 128 ? 2 :
+            s->block_size <= 256 ? 3 : 4;
 
-    slab* s = slabs[ci];
-    if (!s) return;
+        b->next = fast_free[ci];
+        fast_free[ci] = b;
+        fast_free_count[ci]++;
+        return;
+    }
+
     drain_remote(s);
-
     b->next = s->free_list;
     s->free_list = b;
     s->free++;
-
-    if (s->free == s->total) s->eligible_for_reclaim.store(true, std::memory_order_release);
-}
-
-void* realloc(void* ptr, size_t size) {
-    if (!ptr) return malloc(size);
-
-    header* h = ((header*)ptr) - 1;
-    if (h->size >= size) return ptr;
-
-    void* np = malloc(size);
-    if (np) { std::memcpy(np, ptr, h->size); free(ptr); }
-    return np;
-}
-
-void* calloc(size_t num, size_t size) {
-    size_t total = num * size;
-    void* ptr = malloc(total);
-    if (ptr) std::memset(ptr, 0, total);
-    return ptr;
-}
-
-void* memalign(size_t alignment, size_t size) {
-    if ((alignment & (alignment - 1)) != 0) return nullptr;
-
-    if (alignment <= ALIGNMENT) return malloc(size);
-
-    size_t total = size + alignment + sizeof(void*);
-    void* raw = malloc(total);
-    if (!raw) return nullptr;
-
-    uintptr_t raw_addr = reinterpret_cast<uintptr_t>(raw) + sizeof(void*);
-    uintptr_t aligned = (raw_addr + alignment - 1) & ~(alignment - 1);
-
-    void** store = reinterpret_cast<void**>(aligned - sizeof(void*));
-    *store = raw;
-    return reinterpret_cast<void*>(aligned);
-}
-
-void aligned_free(void* ptr) {
-    if (!ptr) return;
-    void** store = reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(ptr) - sizeof(void*));
-    void* raw = *store;
-    if (raw) free(raw);
-    else free(ptr);
-}
-
-char* strdup(const char* s) {
-    if (!s) return nullptr;
-    size_t len = std::strlen(s) + 1;
-    char* copy = (char*)malloc(len);
-    if (copy) std::memcpy(copy, s, len);
-    return copy;
 }
 
 void dump_memory_stats() {
-    size_t user_live = g_stats.user_allocated.load() - g_stats.user_freed.load();
-    size_t os_live = g_stats.os_allocated.load() - g_stats.os_freed.load();
+    size_t cached = 0;
+    for (size_t ci = 0; ci < NUM_CLASSES; ci++) {
+        slab* s = slabs[ci];
+        while (s) {
+            cached += s->free * s->block_size;
+            s = s->next;
+        }
+    }
+
+    size_t user_alloc = g_stats.user_allocated.load();
+    size_t user_freed = g_stats.user_freed.load();
+    size_t os_alloc   = g_stats.os_allocated.load();
+    size_t os_freed   = g_stats.os_freed.load();
+    size_t active     = g_stats.active_allocs.load();
+
+    size_t user_live = (user_alloc > user_freed) ? (user_alloc - user_freed) : 0;
+    size_t os_live   = (os_alloc > os_freed) ? (os_alloc - os_freed) : 0;
 
     printf("========== PIXL MEMORY STATS ==========\n");
-    printf("User allocated : %zu bytes\n", g_stats.user_allocated.load());
-    printf("User freed     : %zu bytes\n", g_stats.user_freed.load());
+    printf("User allocated : %zu bytes\n", user_alloc);
+    printf("User freed     : %zu bytes\n", user_freed);
+    printf("Cached slabs   : %zu bytes\n", cached);
     printf("User live      : %zu bytes\n\n", user_live);
-    printf("OS allocated   : %zu bytes\n", g_stats.os_allocated.load());
-    printf("OS freed       : %zu bytes\n", g_stats.os_freed.load());
+    printf("OS allocated   : %zu bytes\n", os_alloc);
+    printf("OS freed       : %zu bytes\n", os_freed);
     printf("OS live        : %zu bytes\n\n", os_live);
-    printf("Active allocs  : %zu\n", g_stats.active_allocs.load());
+    printf("Active allocs  : %zu\n", active);
     printf("======================================\n");
 }
 
-}
+} 

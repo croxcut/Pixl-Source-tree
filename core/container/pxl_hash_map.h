@@ -218,39 +218,39 @@ public:
         Entry* ptr;
         Entry* end_ptr;
 
-        void skip_to_next() { 
-            while (ptr < end_ptr && !ptr->occupied) ptr++; 
+        void skip_to_next() {
+            while (ptr < end_ptr && !ptr->occupied) ptr++;
         }
 
     public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = std::pair<const Key, Value>;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = value_type*;
+        using reference         = value_type&;
+
         Iterator(Entry* p, Entry* e) : ptr(p), end_ptr(e) { skip_to_next(); }
 
         bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+        bool operator==(const Iterator& other) const { return ptr == other.ptr; }
 
         void operator++() {
             ptr++;
             skip_to_next();
         }
 
-        struct Ref {
-            Entry* e;
-            Key& first() const { return e->key; }
-            Value& second() const { return e->value; }
-        };
+        value_type operator*() const {
+            return { ptr->key, ptr->value };
+        }
 
-        Ref operator*() const { return Ref{ ptr }; }
-
-        struct ArrowProxy {
-            Entry* e;
-            Key& first = e->key;
-            Value& second = e->value;
-        };
-
-        Entry* operator->() const { return ptr; }
+        value_type* operator->() const {
+            return &(operator*());
+        }
     };
 
-    Iterator begin() { return Iterator(table, table + capacity); }
-    Iterator end() { return Iterator(table + capacity, table + capacity); }
+    Iterator begin() const { return Iterator(table, table + capacity); }
+    Iterator end() const { return Iterator(table + capacity, table + capacity); }
+
 };
 
 } 
