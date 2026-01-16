@@ -1,5 +1,5 @@
 CXX = g++
-CFLAGS = -std=c++17 -O2 -static-libgcc -static-libstdc++
+CFLAGS = -std=c++17 -O -static-libgcc -static-libstdc++ -DNDEBUG 
 
 ENGINE_DIR = .
 GAME_DIR = game
@@ -85,7 +85,8 @@ $(OBJ_DIR)/imgui/%.o: $(IMGUI_DIR)/%.cpp
 	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 run: $(OUTPUT)
-	./$(OUTPUT)
+	@echo "Running $(OUTPUT)..."
+	$(OUTPUT)
 
 clean:
 	rm -rf $(OBJ_DIR) $(BUILD_RES_DIR)
