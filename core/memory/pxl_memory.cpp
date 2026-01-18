@@ -28,23 +28,23 @@
 
 #include "pxl_memory.h"
 
-// Window and posix memory kernel calls :)
+// Windows and posix memory kernel calls :)
+static void* os_alloc(size_t size) {
 #ifdef _WIN32
-    static void* os_alloc(size_t size) {
-        return VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    }
-    static void os_free(void* ptr, size_t size) {
-        VirtualFree(ptr, 0, MEM_RELEASE);
-    }
+    return VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 #else
-    static void* os_alloc(size_t size) {
-        void* ptr = mmap(nullptr, size, PROT_HEAD | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        return (ptr == MAP_FAILED) ? nullptr : ptr;
-    }
-    static void os_free(void* ptr, size_t size) {
-        munmap(ptr, size);
-    }
+    void* ptr = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    return (ptr == MAP_FAILED) ? nullptr : ptr;
 #endif
+}
+
+static void os_free(void* ptr, size_t size) {
+#ifdef _WIN32
+    VirtualFree(ptr, 0, MEM_RELEASE);
+#else
+    munmap(ptr, size);
+#endif
+}
 
 // Spin lock thread :)
 static std::atomic_flag global_heap_lock = ATOMIC_FLAG_INIT;
@@ -57,6 +57,26 @@ static inline void unlock_heap() {
     global_heap_lock.clear(std::memory_order_release);
 }
 
+static thread_local u32 t_thread_id = [] {
+    static std::atomic<u32> counter{0};
+    return counter++;
+}();
+
+#if PXL_ENABLE_DEBUG
+
+struct DebugHeader{
+    u64 canary;
+    size_t size;
+    MemoryTag tag;
+    u32 thread;
+};
+
+struct DebugFooter{
+    u64 canary;
+};
+
+#endif
+
 struct Block {
     size_t size;
     bool free;
@@ -64,18 +84,23 @@ struct Block {
 };
 
 struct Arena {
-    char* memory;
-    size_t size;
+    u8* memory;
     size_t offset;
 };
 
-constexpr size_t KB = 1024;
-constexpr size_t MB = 1024 * KB;
+static thread_local Arena t_arena = {};
 
-constexpr size_t CHUNK_SIZE = 1 * MB;
-constexpr size_t ALIGNMENT = alignof(std::max_align_t);
+constexpr size_t PAGE_SIZE =    4096;
+constexpr size_t ARENA_SIZE =   4 * 1024 * 1024;
+constexpr u64 CANARY =          0xDEADC0DECAFEBABE;
 
-constexpr size_t BLOCK_COUNT = 8;
+constexpr size_t KB =           1024;
+constexpr size_t MB =           1024 * KB;
+
+constexpr size_t CHUNK_SIZE =   1 * MB;
+constexpr size_t ALIGNMENT =    alignof(std::max_align_t);
+
+constexpr size_t BLOCK_COUNT =  8;
 constexpr size_t BLOCK_SIZES[BLOCK_COUNT] = {
     32, 64, 128, 256, 512, 1024, 2048, 4096
 };
@@ -92,6 +117,23 @@ static int bin_index(size_t size) {
         if(size <= BLOCK_SIZES[i]) return i;
     
     return -1;
+}
+
+static Block* find_large_block(size_t size) {
+    Block** prev = &global_large_blocks;
+    Block* curr = global_large_blocks;
+    
+    while(curr) {
+        if(curr->size >= size) {
+            *prev = curr->next;
+            curr->next = nullptr;
+            return curr;
+        }
+        prev = &curr->next;
+        curr = curr->next;
+    }
+
+    return nullptr;
 }
 
 static Block* alloc_block(size_t size) {
@@ -145,6 +187,13 @@ void* _pxl_malloc(size_t size) {
         }
     }
 
+    Block* large = find_large_block(size);
+    if (large) {
+        large->free = false;
+        unlock_heap();
+        return large + 1;
+    }
+
     Block* block = alloc_block(size);
     if(!block) {
         unlock_heap();
@@ -162,6 +211,13 @@ void _pxl_free(void* ptr) {
 
     Block* block = ((Block*)ptr) - 1;
     assert(!block->free && "double free");
+
+#if PXL_ENABLE_DEBUG
+    DebugHeader* h = (DebugHeader*)((u8*)ptr - sizeof(DebugHeader));
+    DebugFooter* f = (DebugFooter*)((u8*)h + h->size - sizeof(DebugFooter));
+    assert(h->canary == CANARY && "memory underrun");
+    assert(f->canary == CANARY && "memory overrun");
+#endif
 
     lock_heap();
     block->free = true;
@@ -210,35 +266,59 @@ void* _pxl_calloc(size_t num, size_t size) {
     return ptr;
 }
 
-Arena* _pxl_arena_create(size_t size) {
-    void* memory = os_alloc(size);
-    if(!memory) return nullptr;
-
-    Arena* self = (Arena*)_pxl_malloc(sizeof(Arena));
-    self->memory = (char*)memory;
-    self->size = size;
-    self->offset = 0;
-
-    return self;
+static void _pxl_arena_init() {
+    if(!t_arena.memory) {
+        t_arena.memory = (u8*)os_alloc(ARENA_SIZE);
+        t_arena.offset = 0;
+    }
 }
 
-void* _pxl_arena_alloc(Arena* self, size_t size, size_t alignment = ALIGNMENT) {
-    uintptr_t aligned = align_up(self->offset, alignment);
+static void* _pxl_arena_alloc(size_t size, MemoryTag tag) {
+    _pxl_arena_init();
 
-    if(aligned + size > self->size)
-        return _pxl_malloc(size);
+#if PXL_ENABLE_DEBUG
+    size += sizeof(DebugHeader) + sizeof(DebugFooter);
+#endif
 
-    void* ptr = self->memory + aligned;
-    self->offset = aligned + size;
+    size = (size + 15) & ~15;
 
-    return ptr; 
+    if(t_arena.offset + size > ARENA_SIZE)
+        return nullptr;
+
+    u8* ptr = t_arena.memory + t_arena.offset;
+    t_arena.offset += size;
+
+#if PXL_ENABLE_DEBUG
+    auto* h = (DebugHeader*) ptr;
+    h->canary = CANARY;
+    h->size = size;
+    h->tag = tag;
+    h->thread = t_thread_id;
+
+    auto* f = (DebugFooter*) (ptr + size - sizeof(DebugFooter));
+    f->canary = CANARY;
+
+    return ptr + sizeof(DebugHeader);
+#else
+    return ptr;
+#endif
+}   
+
+static void _pxl_arena_reset() {
+    t_arena.offset = 0;
 }
 
-void _pxl_arena_reset(Arena* self) {
-    self->offset = 0;   
+void __pxl_arena_reset() {
+    _pxl_arena_reset();
 }
 
-void _pxl_arena_destroy(Arena* self) {
-    os_free(self->memory, self->size);
-    _pxl_free(self);
+void* __pxl_alloc(size_t size, MemoryTag tag) {
+    void* ptr = _pxl_arena_alloc(size, tag);
+    if(ptr) return ptr;
+
+    return _pxl_malloc(size);
+}
+
+void __pxl_free(void* ptr) {
+    _pxl_free(ptr);
 }

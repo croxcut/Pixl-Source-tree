@@ -30,27 +30,40 @@
 #define PXL_MEMORY_H
 
 #include "misc/utility/pre_compile.h"
+#include "misc/utility/types.h"
 
-struct  Arena;   // forward declaration for Arena block :)*
+#define PXL_ENABLE_DEBUG    0x001
+#define PXL_ENABLE_NUMA     0x001
+#define PXL_MAX_THREADS     0x0040
+
+enum class MemoryTag : u8 {
+    UNKNOWN,
+    TEMP,
+    ECS,
+    RENDERER,
+    PHYSICS,
+    AUDIO,
+    UI,
+    COUNT
+};
 
 void*   _pxl_malloc(size_t size);
 void    _pxl_free(void* ptr);
 void*   _pxl_realloc(void* ptr, size_t new_size);
 void*   _pxl_calloc(size_t num, size_t size);
 
-Arena*  _pxl_arena_create(size_t size);
-void*   _pxl_arena_alloc(Arena* self, size_t size, size_t alignment);
-void    _pxl_arena_reset(Arena* self);
-void    _pxl_arena_destroy(Arena* self);
+void    __pxl_arena_reset();
+
+void*   __pxl_alloc(size_t size, MemoryTag tag);
+void    __pxl_free(void* ptr);
 
 #define pmalloc(size)                   _pxl_malloc(size)
-#define pfree(ptr)                      _pxl_free(ptr)
 #define prealloc(ptr, new_size)         _pxl_realloc(ptr, new_size)
 #define pcalloc(num, size)              _pxl_calloc(num, size)
 
-#define parninit(size)                  _pxl_arena_create(size)
-#define parnreset(self)                 _pxl_arena_reset(self)
-#define parnalloc(self, size, align)    _pxl_arena_alloc(self, size, align)
-#define parndestroy(self)               _pxl_arena_destroy(self)     
+
+#define palloc(size, tag)               __pxl_alloc(size, tag)
+#define preset()                        __pxl_arena_reset()
+#define pfree(ptr)                      __pxl_free(ptr)
 
 #endif  
