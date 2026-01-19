@@ -12,7 +12,11 @@ later down the line when i fixed the re-occuring issues :D*
 
 and also just for my portfolio :D* 
 
-for now supported rendering API is just OpengGL 4.1 (vulkan will be added later down the line :)*)
+for now supported rendering API is just OpengGL 4.1 (for multi platform support including linux, mac)
+(vulkan will be added later down the line :)*) but maybe directx12 in some unforseen future if i had
+the guts to touch it :D*
+
+for documentation look into the docs folder for listed documentations :)* [its trash as of now]
 
 Here is a little sample snippet of the setup :D*
 ```cpp
