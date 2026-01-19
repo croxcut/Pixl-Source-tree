@@ -32,7 +32,7 @@
 // Current pxl engine version
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
-#define VERSION_PATCH 2
+#define VERSION_PATCH 3
 
 // helper macros for window title initialization
 #define HELPER(x) #x
