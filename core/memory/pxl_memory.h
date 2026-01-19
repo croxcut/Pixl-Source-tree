@@ -54,7 +54,6 @@ inline static void os_free(void* ptr, size_t size) {
 #define PXL_ENABLE_NUMA     0x001
 #define PXL_MAX_THREADS     0x0040
 
-
 constexpr size_t PAGE_SIZE =        4096;
 constexpr u64 CANARY =              0xDEADC0DECAFEBABE;
 
@@ -100,13 +99,12 @@ enum class MemoryTag : u8 {
 #endif
 
 void*   __pxl_malloc(size_t size);
-void    __pxl_free(void* ptr);
 void*   __pxl_realloc(void* ptr, size_t new_size);
 void*   __pxl_calloc(size_t num, size_t size);
-
-void    __pxl_arena_reset();
+void    __pxl_free(void* ptr);
 
 void*   __pxl_alloc(size_t size, MemoryTag tag);
+void    __pxl_arena_reset();
 
 #define pmalloc(size)               __pxl_malloc(size)
 #define prealloc(ptr, new_size)     __pxl_realloc(ptr, new_size)

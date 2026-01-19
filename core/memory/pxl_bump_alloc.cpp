@@ -35,7 +35,7 @@ struct Arena {
 
 static thread_local Arena t_arena = {};
 
-constexpr size_t ARENA_SIZE = 4 * 1024 * 1024;
+constexpr size_t ARENA_SIZE = 4 * 1024 * 1024; // 4mb bump allocated memory
 
 static thread_local u32 t_thread_id = [] {
     static std::atomic<u32> counter{0};

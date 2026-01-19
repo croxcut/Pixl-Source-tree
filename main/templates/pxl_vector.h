@@ -61,6 +61,11 @@ namespace pxl {
             data = new_data;
         }
 
+        void is_out_of_range(int index) {
+            if(index < 0 || index > size) 
+                throw std::out_of_range("index out of range");
+        }
+
     public:
 
         vector(int cap = 16) {
@@ -81,8 +86,7 @@ namespace pxl {
         }
 
         void insert(int index, const T& value) {
-            if(index < 0 || index > size) 
-                throw std::out_of_range("index out of range");
+            is_out_of_range(index);
 
             if(size == capacity)
                 resize();
@@ -98,8 +102,7 @@ namespace pxl {
         }
 
         void remove(int index) {
-            if(index < 0 || index >= size) 
-                throw std::out_of_range("index out of range");
+            is_out_of_range(index);
 
             std::memmove(
                 data + index,
@@ -111,26 +114,22 @@ namespace pxl {
         }
 
         T& operator[](int index) {
-            if(index < 0 || index >= size)
-                throw std::out_of_range("index out of range");
+            is_out_of_range(index);
             return data[index];
         }
 
         const T& operator[](int index) const {
-            if(index < 0 || index >= size)
-                throw std::out_of_range("index out of range");
+            is_out_of_range(index);
             return data[index];
         }
 
         T get(int index) const {
-            if(index < 0 || index >= size) 
-                throw std::out_of_range("index out of range");
+            is_out_of_range(index);
             return data[index];
         }
 
         void set(int index, const T& value) {
-            if(index < 0 || index >= size) 
-                throw std::out_of_range("index out of range");
+            is_out_of_range(index);
             data[index] = value;        
         }
 
