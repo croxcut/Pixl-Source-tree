@@ -88,7 +88,7 @@ void __pxl_arena_reset() {
     __arena_reset();
 }
 
-void* __pxl_alloc(size_t size, MemoryTag tag) {
+void* __pxl_arena_alloc(size_t size, MemoryTag tag) {
     void* ptr = __pxl_arena_alloc(size, tag);
     if(ptr) return ptr;
 
