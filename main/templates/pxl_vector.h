@@ -45,104 +45,220 @@ namespace pxl {
 
     private:
         T* data;  
-        int size;
-        int capacity;
+        int m_size;
+        int m_capacity;
 
-        void resize() {
-            capacity *= 2;
-            T* new_data = (T*)pmalloc(sizeof(T) * capacity);
-                         
-            if constexpr (std::is_trivially_copyable_v<T>) 
-                std::memcpy(new_data, data, sizeof(T) * size);
-            else 
-                for(size_t i = 0; i < size; i++) new_data[i] = data[i];
-            
-            pfree(data);
-            data = new_data;
+        void check_index(int index) const {
+            if(index < 0 || index >= m_size)
+                throw std::out_of_range("index out of range"); 
         }
 
-        void is_out_of_range(int index) {
-            if(index < 0 || index >= size) 
-                throw std::out_of_range("index out of range");
+        void check_insert_index(int index) const {
+            if(index < 0 || index >= m_size)
+                throw std::out_of_range("insert index out of range"); 
+        }
+
+        void grow() {
+            
         }
 
     public:
 
-        vector(int cap = 16) {
-            capacity = cap;
-            size = 0;
-            data = (T*)pmalloc(sizeof(T) * capacity);
-            std::cout << "Initial Size: " << capacity << "\n";
+        explicit vector(int capacity = 16) 
+            : m_size(0), m_capacity(capacity) {
+            data = (T*)pmalloc(sizeof(T) * m_capacity);
         }
 
         ~vector() {
+            clear();
             pfree(data);
         }
 
+        vector(const vector& other)
+            : m_size(other.m_size), m_capacity(other.m_capacity) {
+            
+            data = (T*)pmalloc(sizeof(T) * m_capacity);
+            for(size_t i = 0; i < m_size; i++)
+                new (&data[i]) T(other.data[i]);
+        }
+
+        vector& operator=(const vector& other) {
+            if(this == &other) return *this;
+
+            clear();
+            pfree(data);
+
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+            data = (T*)pmalloc(sizeof(T) * m_capacity);
+
+            for(size_t i = 0; i < m_size; i++) 
+                new (&data[i]) T(other.data[i]);
+
+            return *this;
+        }
+
+        vector(vector&& other) noexcept
+            : data(other.data),
+              m_size(other.m_size),
+              m_capacity(other.m_capacity) {
+            
+            other.data = nullptr;
+            other.m_size = 0;
+            other.m_capacity = 0;
+        }
+
+        vector& operator=(vector&& other) noexcept {
+            if(this == other) return *this;
+
+            clear();
+            pfree(data);
+
+            data = other.data;
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+
+            other.data = nullptr;
+            other.m_size = 0;
+            other.m_capacity = 0;
+
+            return *this;
+        }
+
+        void reserve(int new_capacity) {
+            if (new_capacity <= m_capacity) return;
+
+            T* new_data = (T*)pmalloc(sizeof(T) * new_capacity);
+
+            for(size_t i = 0; i < m_size; i++) 
+                new (&new_data[i]) T(std::move(data[i]));
+            
+            for(size_t i = 0; i < m_size; i++)
+                data[i].~T();
+            
+            pfree(data);
+            data = new_data;
+            m_capacity = new_capacity;
+        }
+
+        void shrink_to_fit() {
+            if(m_size == m_capacity) return;
+
+            T* new_data = (T*)pmalloc(sizeof(T) * m_size);
+
+            for(size_t i = 0; i < m_size; i++)
+                new(&new_data[i]) T(std::move(new_data[i]));
+
+            for(size_t i = 0; i < m_size; i++) 
+                data[i].~T(); 
+
+            pfree(data);
+            data = new_data;
+            m_capacity = m_size;
+        }   
+
+        void clear() {
+            for (size_t i = 0; i < m_size; i++)
+                data[i].~T();
+            
+            m_size = 0;
+        }
+
+        void push_back(const T& value) {
+            if(m_size == m_capacity)
+                grow();
+
+            new(&data[m_size++]) T(value);
+        }
+
+        void push_back(T&& value) {
+            if(m_size == m_capacity)   
+                grow();
+            new(&data[m_size++]) T(std::move(value));
+        }
+
+        template<typename... Args>
+        T& emplace_back(Args&&... args) {
+            if(m_size == m_capacity)
+                grow();
+            
+            new (&data[m_size++]) T(std::forward<Args>(args)...);
+            return data[m_size++];
+        }
+
         void add(const T& value) {
-            if(size == capacity)
-                resize();
-            data[size++] = value;
+            if(m_size == m_capacity)
+                grow();
+            data[m_size++] = value;
         }
 
         void insert(int index, const T& value) {
-            is_out_of_range(index);
+            check_insert_index(index);
 
-            if(size == capacity)
-                resize();
+            if(m_size == m_capacity)
+                grow();
 
             std::memmove(
                 data + index + 1,
                 data + index,
-                sizeof(T) * (size - index)
+                sizeof(T) * (m_size - index)
             );
 
             data[index] = value;
-            size++;
+            m_size++;
         }
 
         void remove(int index) {
-            is_out_of_range(index);
+            check_index(index);
 
             std::memmove(
                 data + index,
                 data + index + 1,
-                sizeof(T) * (size - index - 1)
+                sizeof(T) * (m_size - index - 1)
             );
 
-            size--;
+            m_size--;
         }
 
         T& operator[](int index) {
-            is_out_of_range(index);
+            check_index(index);
             return data[index];
         }
 
         const T& operator[](int index) const {
-            is_out_of_range(index);
+            check_index(index);
             return data[index];
         }
 
         T get(int index) const {
-            is_out_of_range(index);
+            check_index(index);
             return data[index];
         }
 
+        T* begin() { return data; }
+        T* end() { return data + m_size; }
+
+        T& at(int index) { return (*this)[index]; }
+        const T& at(int index) const { return (*this)[index]; }
+
+        const T* begin() const { return data; }
+        const T* end() const { return data + m_size; }
+
         void set(int index, const T& value) {
-            is_out_of_range(index);
+            check_insert_index(index);
             data[index] = value;        
         }
 
         int get_size() const {
-            return size;
+            return m_size;
         }
 
         int get_capacity() const {
-            return capacity;
+            return m_capacity;
         }
 
         bool is_empty() const {
-            return size == 0;
+            return m_size == 0;
         }
     };
 }

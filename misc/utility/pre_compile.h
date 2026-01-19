@@ -42,7 +42,10 @@
 #include <atomic>
 #include <cassert>
 
-#include <stdexcept>
-#include <type_traits>
+#include <new>          
+#include <utility>      
+#include <type_traits>  
+#include <stdexcept>    
+#include <cstring>      
 
 #endif
