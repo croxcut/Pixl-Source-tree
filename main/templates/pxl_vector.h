@@ -30,15 +30,21 @@
 #define PXL_VECTOR_H
 
 #include "core/memory/pxl_memory.h"
-#include <stdexcept>
-#include <type_traits>
 
 namespace pxl {
+    /**     
+     *      Generic custom heap allocated arraylist (analogous to a std::vector), 
+     *      by default initial size by default is 16 (if the size exceeds the 
+     *      capacity) the capacity doubles in size and copy the old data to the 
+     *      new contigous block of memory 
+     * 
+     *      @param @pxl_type 
+     */
     template <typename T>
-    class ArrayList {
+    class vector {
 
     private:
-        T* data;
+        T* data;  
         int size;
         int capacity;
 
@@ -57,14 +63,14 @@ namespace pxl {
 
     public:
 
-        ArrayList(int cap = 8) {
+        vector(int cap = 16) {
             capacity = cap;
             size = 0;
             data = (T*)pmalloc(sizeof(T) * capacity);
             std::cout << "Initial Size: " << capacity << "\n";
         }
 
-        ~ArrayList() {
+        ~vector() {
             pfree(data);
         }
 
@@ -81,19 +87,25 @@ namespace pxl {
             if(size == capacity)
                 resize();
 
-            for(size_t i = 0; i < index; i++) 
-                data[i] = data[i + 1];
+            std::memmove(
+                data + index + 1,
+                data + index,
+                sizeof(T) * (size - index)
+            );
 
             data[index] = value;
             size++;
         }
 
         void remove(int index) {
-            if(index < 0 || index > size) 
+            if(index < 0 || index >= size) 
                 throw std::out_of_range("index out of range");
 
-            for(size_t i = 0; i < size; i++)
-                data[i] = data[i + 1];
+            std::memmove(
+                data + index,
+                data + index + 1,
+                sizeof(T) * (size - index - 1)
+            );
 
             size--;
         }
@@ -111,14 +123,13 @@ namespace pxl {
         }
 
         T get(int index) const {
-            if(index < 0 || index > size) 
+            if(index < 0 || index >= size) 
                 throw std::out_of_range("index out of range");
-
             return data[index];
         }
 
         void set(int index, const T& value) {
-            if(index < 0 || index > size) 
+            if(index < 0 || index >= size) 
                 throw std::out_of_range("index out of range");
             data[index] = value;        
         }

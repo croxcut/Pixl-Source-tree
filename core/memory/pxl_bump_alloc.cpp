@@ -26,94 +26,71 @@
 *                                                                                *
 **********************************************************************************/
 
-#ifndef PXL_MEMORY_H
-#define PXL_MEMORY_H
+#include "pxl_memory.h"
 
-#include "misc/utility/pre_compile.h"
-#include "misc/utility/types.h"
-
-// Windows and posix memory kernel calls :)
-inline static void* os_alloc(size_t size) {
-#ifdef _WIN32
-    return VirtualAlloc(nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-#else
-    void* ptr = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    return (ptr == MAP_FAILED) ? nullptr : ptr;
-#endif
-}
-
-inline static void os_free(void* ptr, size_t size) {
-#ifdef _WIN32
-    VirtualFree(ptr, 0, MEM_RELEASE);
-#else
-    munmap(ptr, size);
-#endif
-}
-
-#define PXL_ENABLE_DEBUG    0x001
-#define PXL_ENABLE_NUMA     0x001
-#define PXL_MAX_THREADS     0x0040
-
-
-constexpr size_t PAGE_SIZE =        4096;
-constexpr u64 CANARY =              0xDEADC0DECAFEBABE;
-
-constexpr size_t KB =               1024;
-constexpr size_t MB =               KB * KB;
-
-constexpr size_t CHUNK_SIZE =       1 * MB;
-constexpr size_t ALIGNMENT =        alignof(std::max_align_t);
-
-constexpr size_t BLOCK_COUNT =      8;
-constexpr size_t BLOCK_SIZES[BLOCK_COUNT] = {
-    32, 64, 128, 256, 512, 1024, 2048, 4096
+struct Arena {
+    u8*     memory;
+    size_t  offset;
 };
 
-enum class MemoryTag : u8 {
-    UNKNOWN,
-    TEMP,
-    ECS,
-    RENDERER,
-    PHYSICS,
-    AUDIO,
-    UI,
-    COUNT
-};
+static thread_local Arena t_arena = {};
+
+constexpr size_t ARENA_SIZE = 4 * 1024 * 1024;
+
+static thread_local u32 t_thread_id = [] {
+    static std::atomic<u32> counter{0};
+    return counter++;
+}();
+
+static void __pxl_arena_init() {
+    if(!t_arena.memory) {
+        t_arena.memory = (u8*)os_alloc(ARENA_SIZE);
+        t_arena.offset = 0;
+    }
+}
+
+static void* __pxl_arena_alloc(size_t size, MemoryTag tag) {
+    __pxl_arena_init();
 
 #if PXL_ENABLE_DEBUG
-    struct DebugHeader{
-        u64         canary;
-        size_t      size;
-        MemoryTag   tag;
-        u32         thread;
-    };
-
-    struct DebugFooter {
-        u64         canary;
-    };
-
-    struct Block {
-        size_t  size;
-        bool    free;
-        Block*  next;
-    };
+    size += sizeof(DebugHeader) + sizeof(DebugFooter);
 #endif
 
-void*   __pxl_malloc(size_t size);
-void    __pxl_free(void* ptr);
-void*   __pxl_realloc(void* ptr, size_t new_size);
-void*   __pxl_calloc(size_t num, size_t size);
+    size = (size + 5) & ~15;
 
-void    __pxl_arena_reset();
+    if(t_arena.offset + size > ARENA_SIZE)
+        return nullptr;
 
-void*   __pxl_alloc(size_t size, MemoryTag tag);
+    u8* ptr = t_arena.memory + t_arena.offset;
+    t_arena.offset += size;
 
-#define pmalloc(size)               __pxl_malloc(size)
-#define prealloc(ptr, new_size)     __pxl_realloc(ptr, new_size)
-#define pcalloc(num, size)          __pxl_calloc(num, size)
-#define pfree(ptr)                  __pxl_free(ptr)
+#if PXL_ENABLE_DEBUG
+    auto* header = (DebugHeader*) ptr;
+    header->canary = CANARY;
+    header->size = size;
+    header->tag = tag;
+    header->thread = t_thread_id;
 
-#define palloc(size, tag)           __pxl_alloc(size, tag)
-#define preset()                    __pxl_arena_reset()
+    auto* footer = (DebugFooter*) (ptr + size - sizeof(DebugFooter));
+    footer->canary = CANARY;
 
-#endif  
+    return ptr + sizeof(DebugHeader);
+#else
+    return ptr;
+#endif
+}
+
+static void __arena_reset() {
+    t_arena.offset = 0;
+}
+
+void __pxl_arena_reset() {
+    __arena_reset();
+}
+
+void* __pxl_alloc(size_t size, MemoryTag tag) {
+    void* ptr = __pxl_arena_alloc(size, tag);
+    if(ptr) return ptr;
+
+    return __pxl_malloc(size);
+}
