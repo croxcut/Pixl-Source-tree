@@ -29,7 +29,7 @@
 #ifndef PXL_MEMORY_H
 #define PXL_MEMORY_H
 
-#include "misc/utility/pre_compile.h"
+#include "misc/utility/pxl_pre_compile.h"
 #include "misc/utility/types.h"
 
 // Windows and posix memory kernel calls :)
