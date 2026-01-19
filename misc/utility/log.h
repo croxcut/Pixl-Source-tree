@@ -75,18 +75,19 @@ static inline const char* pixlShortFile(const char* path) {
     #define ERROR(fmt, ...)  ((void)0)
 #endif
 
-#define ASSERT(expr, fmt, ...) \
-    do { \
-        if (!(expr)) { \
-            char buffer[1024]; \
-            snprintf(buffer, sizeof(buffer), fmt, ##__VA_ARGS__); \
-            fprintf(stderr, "[ASSERT][%s:%d] FAILED (%s) : %s\n", \
-                    pixlShortFile(__FILE__), \
-                    __LINE__, \
-                    #expr, \
-                    buffer); \
-            abort(); \
-        } \
+#define ASSERT(expr, fmt, ...)                                              \
+    do {                                                                    \
+        if (!(expr)) {                                                      \
+            fprintf(stderr,                                                 \
+                "[ASSERT][%s:%d][%s] FAILED (%s): " fmt "\n",               \
+                pixlShortFile(__FILE__),                                    \
+                __LINE__,                                                   \
+                __func__,                                                   \
+                #expr,                                                      \
+                ##__VA_ARGS__);                                             \
+            fflush(stderr);                                                 \
+            abort();                                                        \
+        }                                                                   \
     } while (0)
 
 #endif /* LOG_H */

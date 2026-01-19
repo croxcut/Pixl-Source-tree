@@ -62,7 +62,7 @@ namespace pxl {
         }
 
         void is_out_of_range(int index) {
-            if(index < 0 || index > size) 
+            if(index < 0 || index >= size) 
                 throw std::out_of_range("index out of range");
         }
 
