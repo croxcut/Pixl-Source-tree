@@ -45,9 +45,7 @@ typedef int32_t     s32;
 typedef int64_t     s64;
    
 // Floating points
-typedef float       f32;    // single
+typedef float       f32;    // single 
 typedef double      f64;    // double
-
-
 
 #endif
