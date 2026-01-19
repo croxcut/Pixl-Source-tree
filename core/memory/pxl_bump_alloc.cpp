@@ -49,7 +49,7 @@ static void __pxl_arena_init() {
     }
 }
 
-static void* __pxl_arena_alloc(size_t size, MemoryTag tag) {
+static void* __pxl_internal_arena_alloc(size_t size, MemoryTag tag) {
     __pxl_arena_init();
 
 #if PXL_ENABLE_DEBUG
@@ -89,7 +89,7 @@ void __pxl_arena_reset() {
 }
 
 void* __pxl_arena_alloc(size_t size, MemoryTag tag) {
-    void* ptr = __pxl_arena_alloc(size, tag);
+    void* ptr = __pxl_internal_arena_alloc(size, tag);
     if(ptr) return ptr;
 
     return __pxl_malloc(size);

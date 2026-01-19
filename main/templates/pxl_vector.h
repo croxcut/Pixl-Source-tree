@@ -32,14 +32,6 @@
 #include "core/memory/pxl_memory.h"
 
 namespace pxl {
-    /**     
-     *      Generic custom heap allocated arraylist (analogous to a std::vector), 
-     *      by default initial size by default is 16 (if the size exceeds the 
-     *      capacity) the capacity doubles in size and copy the old data to the 
-     *      new contigous block of memory 
-     * 
-     *      @param @pxl_type 
-     */
     template <typename T>
     class vector {
 
@@ -130,10 +122,10 @@ namespace pxl {
 
             T* new_data = (T*)pmalloc(sizeof(T) * new_capacity);
 
-            for(size_t i = 0; i < m_size; i++) 
+            for(int i = 0; i < m_size; i++) 
                 new (&new_data[i]) T(std::move(data[i]));
             
-            for(size_t i = 0; i < m_size; i++)
+            for(int i = 0; i < m_size; i++)
                 data[i].~T();
             
             pfree(data);
@@ -146,10 +138,10 @@ namespace pxl {
 
             T* new_data = (T*)pmalloc(sizeof(T) * m_size);
 
-            for(size_t i = 0; i < m_size; i++)
+            for(int i = 0; i < m_size; i++)
                 new(&new_data[i]) T(std::move(new_data[i]));
 
-            for(size_t i = 0; i < m_size; i++) 
+            for(int i = 0; i < m_size; i++) 
                 data[i].~T(); 
 
             pfree(data);
@@ -158,7 +150,7 @@ namespace pxl {
         }   
 
         void clear() {
-            for (size_t i = 0; i < m_size; i++)
+            for (int i = 0; i < m_size; i++)
                 data[i].~T();
             
             m_size = 0;
