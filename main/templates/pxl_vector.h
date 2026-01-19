@@ -59,7 +59,7 @@ namespace pxl {
         }
 
         void grow() {
-            
+            reserve(m_capacity == 0 ? 16 : m_capacity * 2);
         }
 
     public:
@@ -235,14 +235,29 @@ namespace pxl {
             return data[index];
         }
 
-        T* begin() { return data; }
-        T* end() { return data + m_size; }
+        T* begin() { 
+            return data; 
+        }
+        
+        T* end() { 
+            return data + m_size;
+        }
 
-        T& at(int index) { return (*this)[index]; }
-        const T& at(int index) const { return (*this)[index]; }
+        T& at(int index) { 
+            return (*this)[index]; 
+        }
+        
+        const T& at(int index) const { 
+            return (*this)[index]; 
+        }
 
-        const T* begin() const { return data; }
-        const T* end() const { return data + m_size; }
+        const T* begin() const { 
+            return data; 
+        }
+        
+        const T* end() const { 
+            return data + m_size; 
+        }
 
         void set(int index, const T& value) {
             check_insert_index(index);
