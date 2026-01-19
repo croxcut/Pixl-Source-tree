@@ -43,6 +43,7 @@ void Window::init() {
 
     if(!glfwInit()) ERROR("Failed to create Window!");
 
+    // OpenGL 4.1 for cross platform compat :)* no posix systems for now can't test them
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
