@@ -86,4 +86,4 @@ static inline const char* pixlShortFile(const char* path) {
         }                                                                   \
     } while (0)
 
-#endif /* LOG_H */
+#endif 

@@ -29,10 +29,20 @@ INCLUDES = -I$(ENGINE_DIR) \
            -I$(IMGUI_DIR)/backends
 
 # Source files
-ENGINE_SRC = $(wildcard $(ENGINE_DIR)/core/**/*.cpp) $(wildcard $(ENGINE_DIR)/main/*.cpp)
+ENGINE_SRC = \
+	$(wildcard $(ENGINE_DIR)/core/*.cpp) \
+	$(wildcard $(ENGINE_DIR)/core/*/*.cpp) \
+	$(wildcard $(ENGINE_DIR)/core/*/*/*.cpp) \
+	$(wildcard $(ENGINE_DIR)/main/*.cpp)
 GAME_SRC   = $(wildcard $(GAME_DIR)/*.cpp)
 GLAD_SRC   = $(GLAD_DIR)/src/glad.c
-IMGUI_SRC  = $(IMGUI_DIR)/imgui*.cpp $(IMGUI_DIR)/backends/imgui_impl_*.cpp
+IMGUI_SRC = \
+	$(IMGUI_DIR)/imgui.cpp \
+	$(IMGUI_DIR)/imgui_draw.cpp \
+	$(IMGUI_DIR)/imgui_tables.cpp \
+	$(IMGUI_DIR)/imgui_widgets.cpp \
+	$(IMGUI_DIR)/backends/imgui_impl_glfw.cpp \
+	$(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 
 # Object files
 ENGINE_OBJ = $(patsubst $(ENGINE_DIR)/%.cpp,$(OBJ_DIR)/engine/%.o,$(ENGINE_SRC))
