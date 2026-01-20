@@ -34,19 +34,29 @@
 namespace pxl {
     template <typename T>
     class vector {
-
     private:
         T* data;  
-        int m_size;
-        int m_capacity;
+        size_t m_size;
+        size_t m_capacity;
 
-        void check_index(int index) const {
+    public:
+        using value_type      = T;
+        using reference       = T&;
+        using const_reference = const T&;
+        using pointer         = T*;
+        using const_pointer   = const T*;
+        using iterator        = pointer;
+        using const_iterator  = const_pointer;
+
+    private:
+
+        void check_index(size_t index) const {
             if(index < 0 || index >= m_size)
                 throw std::out_of_range("index out of range"); 
         }
 
-        void check_insert_index(int index) const {
-            if(index < 0 || index >= m_size)
+        void check_insert_index(size_t index) const {
+            if(index < 0 || index > m_size)
                 throw std::out_of_range("insert index out of range"); 
         }
 
@@ -117,15 +127,35 @@ namespace pxl {
             return *this;
         }
 
+        void resize(size_t new_size, const T& value = T()) {
+            if(new_size < 0)
+                throw std::out_of_range("resize size out of range");
+
+            if(new_size < m_size) {
+                for(size_t i = new_size; i < m_size; i++) 
+                    data[i].~T();
+            } 
+
+            if(new_size > m_size) {
+                if(new_size > m_capacity)
+                    reserve(new_size);
+                
+                for(size_t i = m_size; i < new_size; i++)
+                    new (&data[i]) T(value);
+            }
+
+            m_size = new_size;
+        }
+
         void reserve(int new_capacity) {
             if (new_capacity <= m_capacity) return;
 
             T* new_data = (T*)pmalloc(sizeof(T) * new_capacity);
 
-            for(int i = 0; i < m_size; i++) 
-                new (&new_data[i]) T(std::move(data[i]));
+            for(size_t i = 0; i < m_size; i++) 
+                new (&new_data[i]) T(std::move_if_noexcept(data[i]));
             
-            for(int i = 0; i < m_size; i++)
+            for(size_t i = 0; i < m_size; i++)
                 data[i].~T();
             
             pfree(data);
@@ -133,15 +163,33 @@ namespace pxl {
             m_capacity = new_capacity;
         }
 
+        void resize_uninitialized(int new_size) {
+            if(new_size > m_capacity)
+                reserve(new_size);
+
+            if(new_size < m_size) {
+                for(size_t i = new_size; i < m_size; i++) 
+                    data[i].~T();
+            }
+
+            m_size = new_size;    
+        }
+
+        void swap(vector& other) noexcept {
+            std::swap(data, other.data);
+            std::swap(m_size, other.m_size);
+            std::swap(m_capacity, other.m_capacity);
+        }
+
         void shrink_to_fit() {
             if(m_size == m_capacity) return;
 
             T* new_data = (T*)pmalloc(sizeof(T) * m_size);
 
-            for(int i = 0; i < m_size; i++)
-                new(&new_data[i]) T(std::move(data[i]));
+            for(size_t i = 0; i < m_size; i++)
+                new(&new_data[i]) T(std::move_if_noexcept(data[i]));
 
-            for(int i = 0; i < m_size; i++) 
+            for(size_t i = 0; i < m_size; i++) 
                 data[i].~T(); 
 
             pfree(data);
@@ -150,7 +198,7 @@ namespace pxl {
         }   
 
         void clear() {
-            for (int i = 0; i < m_size; i++)
+            for (size_t i = 0; i < m_size; i++)
                 data[i].~T();
             
             m_size = 0;
@@ -181,16 +229,16 @@ namespace pxl {
         void add(const T& value) {
             if(m_size == m_capacity)
                 grow();
-            data[m_size++] = value;
+            new (&data[m_size++]) T(value);
         }
 
-        void insert(int index, const T& value) {
+        void insert(size_t index, const T& value) {
             check_insert_index(index);
 
             if(m_size == m_capacity)
                 grow();
 
-            for(int i = m_size; i > index; i++) {
+            for(size_t i = m_size; i > index; i++) {
                 new (&data[i]) T(std::move(data[i - 1]));
                 data[i - 1].~T();
             }
@@ -199,20 +247,24 @@ namespace pxl {
             m_size++;
         }
 
-        void remove(int index) {
+        void remove(size_t index) {
             check_index(index);
 
-            data[index].~T();
-
-            for(int i = m_size; i > index; i++) {
-                new (&data[i]) T(std::move(data[i - 1]));
-                data[i - 1].~T();
+            for(size_t i = index; i < m_size; i++) {
+                data[i] = std::move(data[i + 1]);
             }
 
+            data[m_size - 1].~T();
             m_size--;
         }
 
-        void assign(int count, const T& value) {
+        iterator erase(iterator pos) {
+            size_t index = static_cast<size_t>(pos - data);
+            remove(index);
+            return data + index;
+        }
+
+        void assign(size_t count, const T& value) {
             if(count < 0)
                 throw std::out_of_range("assign count out of range");
 
@@ -221,7 +273,7 @@ namespace pxl {
             if(count > m_capacity)
                 reserve(count);
             
-            for(int i = 0; i < count; i++) 
+            for(size_t i = 0; i < count; i++) 
                 new (&data[i]) T(value);
 
             m_size = count;
@@ -231,75 +283,99 @@ namespace pxl {
             if(first > last) 
                 throw std::out_of_range("invalid assign range");
             
-            int count = static_cast<int>(last - first);
+            size_t count = static_cast<size_t>(last - first);
 
             clear();
 
             if(count > m_capacity) 
                 reserve(count);
             
-            for(int i = 0; i < count; i++) 
+            for(size_t i = 0; i < count; i++) 
                 new (&data[i]) T(first[i]);
         }
 
         void assign(std::initializer_list<T> list) {
             clear();
 
-            if((int)list.size() > m_capacity)
-                reserve((int)list.size());
+            if((size_t)list.size() > m_capacity)
+                reserve((size_t)list.size());
             
-            int i = 0;
+            size_t i = 0;
             for(const T& v : list) 
                 new (&data[i++]) T(v);
                 
-            m_size = (int)list.size();
+            m_size = (size_t)list.size();
         }
 
-        T& operator[](int index) {
+        reference operator[](size_t index) {
             check_index(index);
             return data[index];
         }
 
-        const T& operator[](int index) const {
+        const_reference operator[](size_t index) const {
             check_index(index);
             return data[index];
         }
 
-        T get(int index) const {
+        value_type get(size_t index) const {
             check_index(index);
             return data[index];
         }
 
-        T* begin() { 
-            return data; 
-        }
-        
-        T* end() { 
-            return data + m_size;
-        }
-
-        const T* begin() const {
+        iterator begin() noexcept  {
             return data;
         }
 
-        const T* end() const {
+        iterator end() noexcept {
             return data + m_size;
         }
 
-        const T* cbegin() const {
+        const_iterator begin() const {
             return data;
         }
 
-        const T* cend() const {
+        const_iterator end() const {
             return data + m_size;
         }
 
-        T& at(int index) { 
-            return (*this)[index]; 
+        const_iterator cbegin() const {
+            return data;
         }
-        
-        const T& at(int index) const { 
-            return (*this)[index]; 
+
+        const_iterator cend() const {
+            return data + m_size;
+        }
+
+        reference at(size_t index) {
+            return (*this)[index];
+        }
+
+        const_reference at(size_t index) const {
+            return (*this)[index];
+        }
+
+        reference front() {
+            return data[0];
+        }
+
+        reference back() {
+            return data[m_size - 1];
+        }
+
+        const_reference front() const {
+            return data[0];
+        }
+
+        const_reference back() const {
+            return data[m_size - 1];
+        }
+
+        pointer data_ptr() {
+            return data;
+        }
+
+        const_pointer data_ptr() const {
+            return data;
         }
 
         void set(int index, const T& value) {
@@ -307,11 +383,17 @@ namespace pxl {
             data[index] = value;        
         }
 
-        int size() const {
+        void pop_back() {
+            if(m_size == 0) 
+                throw std::out_of_range("pop_back on empty vector");
+            data[--m_size].~T();
+        }
+
+        size_t size() const {
             return m_size;
         }
 
-        int get_capacity() const {
+        size_t get_capacity() const {
             return m_capacity;
         }
 
