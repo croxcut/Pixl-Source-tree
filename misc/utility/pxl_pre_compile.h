@@ -1,3 +1,4 @@
+
 /*********************************************************************************
 *                                                                                *
 *                                PIXL ENGINE                                     *
@@ -29,6 +30,7 @@
 #ifndef PRE_COMPILE_H
 #define PRE_COMPILE_H
 
+// Platform-specific Windows/posix systems
 #ifdef _WIN32
     #include <windows.h>
 #else
@@ -36,26 +38,26 @@
     #include <unistd.h>
 #endif
 
+// OpenGL / Windowing
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+// C++ standard library :)*
+#include <atomic>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <atomic>
-#include <cassert>
-
-#include <new>          
-#include <utility>      
-#include <type_traits>  
-#include <stdexcept>    
-#include <cstring>      
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <new>
 #include <random>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+
+// C standard library :)*
+#include <cstdio>
+#include <cstdlib>
+#include <cstdarg>
+#include <ctime>
 
 #endif
