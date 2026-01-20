@@ -444,10 +444,14 @@ namespace pxl {
         }
 
         pointer data() {
+            if(m_size == 0)
+                return nullptr;
             return _data;
         }
 
         const_pointer data() const {
+            if(m_size == 0)
+                return nullptr;
             return _data;
         }
 
