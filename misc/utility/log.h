@@ -29,11 +29,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "pxl_pre_compile.h"
 
 #include "types.h"
 

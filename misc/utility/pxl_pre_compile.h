@@ -36,6 +36,9 @@
     #include <unistd.h>
 #endif
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -47,5 +50,13 @@
 #include <type_traits>  
 #include <stdexcept>    
 #include <cstring>      
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include <random>
 
 #endif

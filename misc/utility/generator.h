@@ -29,8 +29,7 @@
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
-#include <atomic>
-#include <random>
+#include "pxl_pre_compile.h"
 
 #include "types.h"
 

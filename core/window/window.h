@@ -29,8 +29,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "misc/utility/pxl_pre_compile.h"
 
 #include "../config.h"
 

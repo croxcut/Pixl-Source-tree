@@ -29,7 +29,6 @@
 #include "core/memory/pxl_memory.h"
 #include "main/templates/pxl_vector.h"
 
-// The beginning of custom generic hashmap for pxl engine :)* 4th attempt
 namespace pxl {
 
     template<typename K, typename V>
