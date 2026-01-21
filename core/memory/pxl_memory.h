@@ -90,12 +90,6 @@ enum class MemoryTag : u8 {
     struct DebugFooter {
         u64         canary;
     };
-
-    struct Block {
-        size_t  size;
-        bool    free;
-        Block*  next;
-    };
 #endif
 
 void*   __pxl_malloc(size_t size);

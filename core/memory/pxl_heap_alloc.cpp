@@ -28,6 +28,12 @@
 
 #include "pxl_memory.h"
 
+struct Block {
+    size_t  size;
+    bool    free;
+    Block*  next;
+};
+
 static std::atomic_flag global_heap_lock = ATOMIC_FLAG_INIT;
 
 static inline void lock_heap() {
