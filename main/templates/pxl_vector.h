@@ -53,8 +53,8 @@ namespace pxl {
         /**
          *      checks if the index is out of bounds of the array
          */
-        void check_index(size_t index) const {
-            if(index >= m_size)
+        void check_index(int index) const {
+            if(static_cast<size_t>(index) >= m_size)
                 throw std::out_of_range("index out of range"); 
         }
 
@@ -169,7 +169,7 @@ namespace pxl {
             m_size = new_size;
         }
 
-        void reserve(int new_capacity) {
+        void reserve(size_t new_capacity) {
             if (new_capacity <= m_capacity) return;
 
             T* new_data = (T*)pmalloc(sizeof(T) * new_capacity);
@@ -192,7 +192,7 @@ namespace pxl {
             m_capacity = new_capacity;
         }
 
-        void resize_uninitialized(int new_size) {
+        void resize_uninitialized(size_t new_size) {
             if(new_size > m_capacity)
                 reserve(new_size);
 
@@ -296,7 +296,7 @@ namespace pxl {
             new (&_data[m_size++]) T(value);
         }
 
-        void insert(size_t index, const T& value) {
+        void insert(int index, const T& value) {
             check_insert_index(index);
 
             if(m_size == m_capacity)
@@ -311,10 +311,10 @@ namespace pxl {
             m_size++;
         }
 
-        void remove(size_t index) {
+        void remove(int index) {
             check_index(index);
 
-            for(size_t i = index; i + 1< m_size; i++) 
+            for(size_t i = static_cast<size_t>(index); i + 1 < m_size; i++) 
                 _data[i] = std::move(_data[i + 1]);
 
             _data[m_size - 1].~T();
@@ -372,17 +372,17 @@ namespace pxl {
             m_size = (size_t)list.size();
         }
 
-        reference operator[](size_t index) {
+        reference operator[](int index) {
             check_index(index);
             return _data[index];
         }
 
-        const_reference operator[](size_t index) const {
+        const_reference operator[](int index) const {
             check_index(index);
             return _data[index];
         }
 
-        value_type get(size_t index) const {
+        value_type get(int index) const {
             check_index(index);
             return _data[index];
         }
@@ -415,7 +415,7 @@ namespace pxl {
             return (*this)[index];
         }
 
-        const_reference at(size_t index) const {
+        const_reference at(int index) const {
             return (*this)[index];
         }
 
