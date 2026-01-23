@@ -43,10 +43,9 @@ struct Block {
     Block*  chunk_end;
 };
 
-static std::atomic_flag global_heap_lock = ATOMIC_FLAG_INIT;
-
-static Block* global_bins[BLOCK_COUNT] = {};
-static Block* global_large_blocks = nullptr;
+struct Footer {
+    size_t size;
+};
 
 #if PXL_ENABLE_STATS
 static size_t global_bytes_allocated    = 0;
@@ -54,6 +53,10 @@ static size_t global_peak_bytes         = 0;
 static size_t global_alloc_count        = 0;
 #endif
 
+static std::atomic_flag global_heap_lock = ATOMIC_FLAG_INIT;
+
+static Block* global_bins[BLOCK_COUNT] = {};
+static Block* global_large_blocks = nullptr;
 
 static inline void lock_heap() {
     while(global_heap_lock.test_and_set(std::memory_order_acquire)) {}
@@ -67,10 +70,22 @@ static inline size_t align_up(size_t v, size_t a) {
     return (v + a - 1) & ~(a - 1);
 }
 
+static inline Footer* block_footer(Block* block) {
+    return (Footer*)((char*)(block + 1) + block->size);
+}
+
 static inline Block* next_physical(Block* block) {
-    Block* next = (Block*)((char*)(block + 1) + block->size); 
+    Block* next = (Block*)((char*)(block + 1) + block->size + sizeof(Footer));
     return (next < block->chunk_end) ? next : nullptr;
 }
+
+static inline Block* prev_physical(Block* block) {
+    if((void*)block <= (void*)((char*)block->chunk_end - CHUNK_SIZE))
+        return nullptr;
+
+    Footer* prev_footer = (Footer*)((char*)block - sizeof(Footer));
+    return (Block*)((char*)block - prev_footer->size - sizeof(Block) - sizeof(Footer));
+} 
 
 static inline bool is_valid_block(Block* block) {
     return block && block->size > 0;
@@ -91,52 +106,74 @@ static void insert_large_block(Block* block) {
     *curr = block;
 }
 
-static Block* find_large_block(size_t size) {
-    Block** prev = &global_large_blocks;
-    Block* curr = global_large_blocks;
+static void remove_from_free_lists(Block* block) {
+    int bin = bin_index(block->size);
 
-    while(curr) {
-        if(curr->size >= size) {
-            *prev = curr->next;
-            curr->next = nullptr;
-            return curr;
+    Block** list = (bin >= 0) ? &global_bins[bin] : &global_large_blocks;
+    while(*list) {
+        if(*list == block) {
+            *list = block->next;
+            return;
         }
-        prev = &curr->next;
-        curr = curr->next;
+        list = &(*list)->next;
     }
-
-    return nullptr;
 }
 
+// static Block* find_large_block(size_t size) {
+//     Block** prev = &global_large_blocks;
+//     Block* curr = global_large_blocks;
+
+//     while(curr) {
+//         if(curr->size >= size) {
+//             *prev = curr->next;
+//             curr->next = nullptr;
+//             return curr;
+//         }
+//         prev = &curr->next;
+//         curr = curr->next;
+//     }
+
+//     return nullptr;
+// }
+
 static Block* alloc_block(size_t size) {
-    size_t total = align_up(sizeof(Block) + size, ALIGNMENT);
+    size_t total = align_up(sizeof(Block) + size + sizeof(Footer), ALIGNMENT);
     size_t request = align_up(total, CHUNK_SIZE);
 
     void* memory = os_alloc(request);
-    if(!memory) 
-        return nullptr;
+    if(!memory) return nullptr;
 
     Block* block = (Block*)memory;
-    block->size = request - sizeof(Block);
+    block->size = request - sizeof(Block) - sizeof(Footer);
     block->free = false;
     block->next = nullptr;
     block->chunk_end = (Block*)((char*)memory + request);
-    
+
+    Footer* footer = block_footer(block);
+    footer->size = block->size;
+
     return block;
 }
 
 static void split_block(Block* block, size_t size) {
     size_t remaining = block->size - size;
 
-    if(remaining < sizeof(Block) + PXL_MIN_SPLIT)
+    if(remaining < sizeof(Block) + sizeof(Footer) + PXL_MIN_SPLIT) 
         return;
 
-    Block* split = (Block*)((char*)(block + 1) + size);
-    split->size = remaining - sizeof(Block);
+    Block* split = (Block*)((char*)(block + 1) + size + sizeof(Footer));
+    split->size = remaining - sizeof(Block) - sizeof(Footer);
     split->free = true;
     split->next = nullptr;
+    split->chunk_end = block->chunk_end;
 
     block->size = size;
+
+    Footer* footer_1 = block_footer(block);
+    footer_1->size = block->size;
+
+    Footer* footer_2 = block_footer(block);
+    footer_2->size = split->size;
 
     int bin = bin_index(split->size);
     if(bin >= 0) {
@@ -147,46 +184,52 @@ static void split_block(Block* block, size_t size) {
     }
 }
 
-static void remove_from_free_lists(Block* block) {
-    int bin = bin_index(block->size);
+// static void remove_from_free_lists(Block* block) {
+//     int bin = bin_index(block->size);
 
-    if(bin >= 0) {
-        Block** curr = &global_bins[bin];
-        while(*curr) {
-            if(*curr == block) {
-                *curr = block->next;
-                return;
-            }
-            curr = &(*curr)->next;
-        }
-    } else {
-        Block** curr = &global_large_blocks;
-        while(*curr) {
-            if(*curr == block) {
-                *curr = block->next;
-                return;
-            }
-            curr = &(*curr)->next;
-        }
-    }
-}
+//     if(bin >= 0) {
+//         Block** curr = &global_bins[bin];
+//         while(*curr) {
+//             if(*curr == block) {
+//                 *curr = block->next;
+//                 return;
+//             }
+//             curr = &(*curr)->next;
+//         }
+//     } else {
+//         Block** curr = &global_large_blocks;
+//         while(*curr) {
+//             if(*curr == block) {
+//                 *curr = block->next;
+//                 return;
+//             }
+//             curr = &(*curr)->next;
+//         }
+//     }
+// }
 
 static Block* coalesce(Block* block) {
     Block* next = next_physical(block);
-
-    if(is_valid_block(next) && next->free) {
+    if(next && next->free) {
         remove_from_free_lists(next);
-
-        block->size += sizeof(Block) + next->size;
-        block->next = next->next;
+        block->size += sizeof(Block) + sizeof(Footer) + next->size;
     }
+
+    Block* prev = prev_physical(block);
+    if(prev && prev->free) {
+        remove_from_free_lists(block);
+        prev->size += sizeof(Block) + sizeof(Footer) + block->size;
+        block = prev;
+    }
+
+    Footer* footer = block_footer(block);
+    footer->size = block->size;
 
     return block;
 }
 
 void* __pxl_malloc(size_t size) {
-    if(size <= 0) return nullptr;
-
+    if(size == 0) return nullptr;
     size = align_up(size, ALIGNMENT);
 
     lock_heap();
@@ -206,19 +249,15 @@ void* __pxl_malloc(size_t size) {
         return block + 1;
     }
 
-    Block* block = find_large_block(size);
+    Block* block = alloc_block(size);
     if(!block) {
-        block = alloc_block(size);
-        if(!block) {
-            unlock_heap();
-            return nullptr;
-        }
+        unlock_heap();
+        return nullptr;
     }
 
-    block->free = false;
     split_block(block, size);
 
-#if PXL_ENABLE_STATS    
+#if PXL_ENABLE_STATS
     global_bytes_allocated += block->size;
     global_peak_bytes = std::max(global_peak_bytes, global_bytes_allocated);
     global_alloc_count++;
@@ -230,7 +269,6 @@ void* __pxl_malloc(size_t size) {
 
 void* __pxl_realloc(void* ptr, size_t new_size) {
     if(!ptr) return __pxl_malloc(new_size);
-
     if(new_size == 0) {
         __pxl_free(ptr);
         return nullptr;
@@ -245,10 +283,11 @@ void* __pxl_realloc(void* ptr, size_t new_size) {
     lock_heap();
 
     Block* next = next_physical(block);
-    if(is_valid_block(next) && next->free &&
-        block->size + sizeof(Block) + next->size >= new_size) {
-        
-        block->size += sizeof(Block) + next->size;
+    if(next && next->free &&
+       block->size + sizeof(Block) + sizeof(Footer) + next->size >= new_size) {
+
+        remove_from_free_lists(next);
+        block->size += sizeof(Block) + sizeof(Footer) + next->size;
         split_block(block, new_size);
         unlock_heap();
         return ptr;
@@ -261,7 +300,6 @@ void* __pxl_realloc(void* ptr, size_t new_size) {
         memcpy(new_ptr, ptr, block->size);
         __pxl_free(ptr);
     }
-
     return new_ptr;
 }
 
