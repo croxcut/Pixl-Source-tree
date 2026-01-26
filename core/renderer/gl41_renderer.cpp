@@ -41,40 +41,40 @@ GL41Renderer::~GL41Renderer() {
     cleanup();
 }
 
-u64 GL41Renderer::add_mesh(struct Mesh& mesh) {
+u64_t GL41Renderer::add_mesh(struct Mesh& mesh) {
     if(mesh.verticies.empty()) return -1;
 
     GL41Mesh::create(mesh);
-    u64 mesh_id = Generator::generate_id();
+    u64_t mesh_id = Generator::generate_id();
 
     gl41_meshes.emplace(mesh_id, std::move(mesh));
 
     return mesh_id;
 }   
 
-u64 GL41Renderer::add_shader(struct Shader& shader) {
+u64_t GL41Renderer::add_shader(struct Shader& shader) {
     if(!shader.vertex || !shader.fragment) return -1;
 
     GL41Shader gl41_shader(shader);
 
-    u64 shader_id = Generator::generate_id();
+    u64_t shader_id = Generator::generate_id();
 
     gl41_shaders.emplace(shader_id, std::move(gl41_shader));
 
     return shader_id;
 }
 
-void GL41Renderer::draw_mesh(const u64& mesh_id) {
+void GL41Renderer::draw_mesh(const u64_t& mesh_id) {
     auto it =  gl41_meshes.find(mesh_id);
     if(it == gl41_meshes.end()) {
-        ERROR("Mesh Not Found: %llu", mesh_id);
+        ERR("Mesh Not Found: %llu", mesh_id);
         return;    
     }   
 
     Mesh& mesh = it->second;
 
     for (size_t i = 0; i < mesh.textures.size(); ++i) {
-        u32 texture = mesh.textures[i];
+        u32_t texture = mesh.textures[i];
 
         if (i < bound_textures.size() && bound_textures[i] == texture)
             continue;
@@ -96,7 +96,7 @@ void GL41Renderer::draw_mesh(const u64& mesh_id) {
     glDrawElements(GL_TRIANGLES, mesh.size, GL_UNSIGNED_INT, 0);
 }
 
-void GL41Renderer::use_shader(const u64& shader_id) {
+void GL41Renderer::use_shader(const u64_t& shader_id) {
     auto it = gl41_shaders.find(shader_id);
     if(it != gl41_shaders.end()) {
         if(current_shader != shader_id) {
@@ -104,7 +104,7 @@ void GL41Renderer::use_shader(const u64& shader_id) {
             it->second.use();
         }
     } else {
-        ERROR("Shader not found: %llu", shader_id);
+        ERR("Shader not found: %llu", shader_id);
         return;
     }
 }
@@ -157,7 +157,7 @@ void GL41Renderer::cleanup() {
         glDeleteVertexArrays(1, &mesh.vao);
         glDeleteBuffers(1, &mesh.vbo);
         glDeleteBuffers(1, &mesh.ebo);
-        for(u32 tex : mesh.textures) {
+        for(u32_t tex : mesh.textures) {
             glDeleteTextures(1, &tex);
         }
     }

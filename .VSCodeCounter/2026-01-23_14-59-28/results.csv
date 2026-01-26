@@ -1,0 +1,18 @@
+"filename", "language", "C++", "comment", "blank", "total"
+"d:\croxcut\c projects\OpenGL\core\config.h", "C++", 14, 28, 8, 50
+"d:\croxcut\c projects\OpenGL\core\io\file.h", "C++", 21, 27, 7, 55
+"d:\croxcut\c projects\OpenGL\core\memory\pxl_bump_alloc.cpp", "C++", 51, 27, 19, 97
+"d:\croxcut\c projects\OpenGL\core\memory\pxl_heap_alloc.cpp", "C++", 224, 27, 66, 317
+"d:\croxcut\c projects\OpenGL\core\memory\pxl_memory.h", "C++", 66, 28, 17, 111
+"d:\croxcut\c projects\OpenGL\core\renderer\gl41_mesh.cpp", "C++", 26, 27, 17, 70
+"d:\croxcut\c projects\OpenGL\core\renderer\gl41_mesh.h", "C++", 9, 27, 8, 44
+"d:\croxcut\c projects\OpenGL\core\renderer\gl41_renderer.cpp", "C++", 123, 27, 16, 166
+"d:\croxcut\c projects\OpenGL\core\renderer\gl41_renderer.h", "C++", 26, 27, 14, 67
+"d:\croxcut\c projects\OpenGL\core\renderer\gl41_shader.cpp", "C++", 53, 33, 14, 100
+"d:\croxcut\c projects\OpenGL\core\renderer\gl41_shader.h", "C++", 20, 27, 11, 58
+"d:\croxcut\c projects\OpenGL\core\renderer\pxl_renderer.h", "C++", 12, 27, 4, 43
+"d:\croxcut\c projects\OpenGL\core\renderer\pxl_renderer_backend.h", "C++", 47, 27, 17, 91
+"d:\croxcut\c projects\OpenGL\core\version.h", "C++", 8, 27, 4, 39
+"d:\croxcut\c projects\OpenGL\core\window\window.cpp", "C++", 66, 28, 24, 118
+"d:\croxcut\c projects\OpenGL\core\window\window.h", "C++", 27, 27, 13, 67
+"Total", "-", 793, 441, 259, 1493

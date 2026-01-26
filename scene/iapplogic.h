@@ -34,7 +34,7 @@
 class IAppLogic {
 public:
     virtual void init() = 0;
-    virtual void tick(const f32& dt) = 0;
+    virtual void tick(const f32_t& dt) = 0;
     virtual void render() = 0;
     virtual void cleanup() = 0;
 };

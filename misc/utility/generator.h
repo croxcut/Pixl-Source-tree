@@ -34,8 +34,8 @@
 #include "types.h"
 
 namespace Generator{
-    inline u64 generate_id() noexcept {
-        static std::atomic<u64> counter{1};
+    inline u64_t generate_id() noexcept {
+        static std::atomic<u64_t> counter{1};
         return counter.fetch_add(1, std::memory_order_relaxed);
     }
 };

@@ -37,9 +37,9 @@
 #include <glm/glm.hpp> 
 
 struct Vertex{
-    f32 x, y, z;
-    f32 r, g, b;
-    f32 u, v;
+    f32_t x, y, z;
+    f32_t r, g, b;
+    f32_t u, v;
 };
 
 struct Texture{
@@ -48,12 +48,12 @@ struct Texture{
 
 struct Mesh {
     std::vector<Vertex> verticies;
-    std::vector<u32> indices;
-    std::vector<u32> textures;
+    std::vector<u32_t> indices;
+    std::vector<u32_t> textures;
 
-    u32 vao;
-    u32 vbo;
-    u32 ebo;
+    u32_t vao;
+    u32_t vbo;
+    u32_t ebo;
 
     size_t size;
 };
@@ -64,8 +64,8 @@ struct Shader {
 };
 
 struct DrawCall {
-    u64 mesh_id;
-    u64 shader_id;
+    u64_t mesh_id;
+    u64_t shader_id;
     
     glm::mat4 transform;
     std::unordered_map<std::string, glm::mat4> mat4_uniform;

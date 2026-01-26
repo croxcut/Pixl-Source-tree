@@ -61,14 +61,14 @@ static inline const char* pixlShortFile(const char* path) {
                 buffer); \
     } while (0)
 
-#ifdef PIXL_LOGGER_ENABLED
+#ifdef PXL_LOGGER_ENABLED
     #define LOG(fmt, ...)    PIXL_LOG_IMPL("LOG", fmt, ##__VA_ARGS__)
-    #define WARN(fmt, ...)   PIXL_LOG_IMPL("WRN", fmt, ##__VA_ARGS__)
-    #define ERROR(fmt, ...)  PIXL_LOG_IMPL("ERR", fmt, ##__VA_ARGS__)
+    #define WRN(fmt, ...)   PIXL_LOG_IMPL("WRN", fmt, ##__VA_ARGS__)
+    #define ERR(fmt, ...)  PIXL_LOG_IMPL("ERR", fmt, ##__VA_ARGS__)
 #else
     #define LOG(fmt, ...)    ((void)0)
-    #define WARN(fmt, ...)   ((void)0)
-    #define ERROR(fmt, ...)  ((void)0)
+    #define WRN(fmt, ...)   ((void)0)
+    #define ERR(fmt, ...)  ((void)0)
 #endif
 
 #define ASSERT(expr, fmt, ...)                                              \

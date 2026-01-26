@@ -55,7 +55,7 @@ inline static void os_free(void* ptr, size_t size) {
 #define PXL_MAX_THREADS     0x0040
 
 constexpr size_t PAGE_SIZE =        4096;
-constexpr u64 CANARY =              0xDEADC0DECAFEBABE;
+constexpr u64_t CANARY =              0xDEADC0DECAFEBABE;
 
 constexpr size_t KB =               1024;
 constexpr size_t MB =               KB * KB;
@@ -68,7 +68,7 @@ constexpr size_t BLOCK_SIZES[BLOCK_COUNT] = {
     32, 64, 128, 256, 512, 1024, 2048, 4096
 };
 
-enum class MemoryTag : u8 {
+enum class MemoryTag : u8_t {
     UNKNOWN,
     TEMP,
     ECS,
@@ -81,14 +81,14 @@ enum class MemoryTag : u8 {
 
 #if PXL_ENABLE_DEBUG
     struct DebugHeader{
-        u64         canary;
+        u64_t         canary;
         size_t      size;
         MemoryTag   tag;
-        u32         thread;
+        u32_t         thread;
     };
 
     struct DebugFooter {
-        u64         canary;
+        u64_t         canary;
     };
 #endif
 

@@ -49,13 +49,13 @@ GL41Shader::GL41Shader(struct Shader& shader) {
     );
 }
 
-u32 GL41Shader::compile(
+u32_t GL41Shader::compile(
     const char* source,
     GLenum type
 ) {
     const char* _source = file::load_shader(source);
 
-    u32 _shader = 0;
+    u32_t _shader = 0;
     _shader = glCreateShader(type);
     glShaderSource(_shader, 1, &_source, NULL);
     glCompileShader(_shader);
@@ -64,11 +64,11 @@ u32 GL41Shader::compile(
     return _shader;
 }
 
-u32 GL41Shader::create_program(
-    const u32& vertex,
-    const u32& fragment
+u32_t GL41Shader::create_program(
+    const u32_t& vertex,
+    const u32_t& fragment
 ) {
-    u32 _program = 0;
+    u32_t _program = 0;
 
     _program = glCreateProgram();
     glAttachShader(_program, vertex);
@@ -93,7 +93,7 @@ void GL41Shader::set_mat4(
     const char* uniform,
     const glm::mat4& mat
 ) {
-    u32 loc = glGetUniformLocation(program, uniform);
+    u32_t loc = glGetUniformLocation(program, uniform);
     if(loc != -1) {
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
     }

@@ -50,27 +50,16 @@ namespace pxl {
 
     private:
 
-        /**
-         *      checks if the index is out of bounds of the array
-         */
         void check_index(int index) const {
             if(static_cast<size_t>(index) >= m_size)
                 throw std::out_of_range("index out of range"); 
         }
 
-        /**
-         *      checks if the inserted index is out of bounds of the array
-         */
         void check_insert_index(size_t index) const {
             if(index > m_size)
                 throw std::out_of_range("insert index out of range"); 
         }
 
-        /**
-         *      this function call is responsible for doubling the size of the container
-         *      if the initial size exceeds the new one
-         *      
-         */
         void grow() {
             reserve(m_capacity == 0 ? 16 : m_capacity * 2);
         }
@@ -154,7 +143,7 @@ namespace pxl {
             //     throw std::out_of_range("resize size out of range");
 
             if(new_size < m_size) {
-                for(size_t i = new_size; i < m_size; i++) 
+                for(size_t i = new_size; i < m_size; i++)  
                     _data[i].~T();
             } 
 

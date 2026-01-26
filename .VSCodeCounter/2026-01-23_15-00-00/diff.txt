@@ -1,0 +1,49 @@
+Date : 2026-01-23 15:00:00
+Directory : d:\croxcut\c projects\OpenGL\scene
+Total : 17 files,  -782 codes, -414 comments, -255 blanks, all -1451 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| C++      |         17 |       -782 |       -414 |       -255 |     -1,451 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                              | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                 |         17 |       -782 |       -414 |       -255 |     -1,451 |
+| . (Files)                                                         |          1 |         11 |         27 |          4 |         42 |
+| ..                                                                |         16 |       -793 |       -441 |       -259 |     -1,493 |
+| ..\core                                                           |         16 |       -793 |       -441 |       -259 |     -1,493 |
+| ..\core (Files)                                                   |          2 |        -22 |        -55 |        -12 |        -89 |
+| ..\core\io                                                        |          1 |        -21 |        -27 |         -7 |        -55 |
+| ..\core\memory                                                    |          3 |       -341 |        -82 |       -102 |       -525 |
+| ..\core\renderer                                                  |          8 |       -316 |       -222 |       -101 |       -639 |
+| ..\core\window                                                    |          2 |        -93 |        -55 |        -37 |       -185 |
++-------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                          | language | code       | comment    | blank      | total      |
++-------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| d:\croxcut\c projects\OpenGL\core\config.h                        | C++      |        -14 |        -28 |         -8 |        -50 |
+| d:\croxcut\c projects\OpenGL\core\io\file.h                       | C++      |        -21 |        -27 |         -7 |        -55 |
+| d:\croxcut\c projects\OpenGL\core\memory\pxl_bump_alloc.cpp       | C++      |        -51 |        -27 |        -19 |        -97 |
+| d:\croxcut\c projects\OpenGL\core\memory\pxl_heap_alloc.cpp       | C++      |       -224 |        -27 |        -66 |       -317 |
+| d:\croxcut\c projects\OpenGL\core\memory\pxl_memory.h             | C++      |        -66 |        -28 |        -17 |       -111 |
+| d:\croxcut\c projects\OpenGL\core\renderer\gl41_mesh.cpp          | C++      |        -26 |        -27 |        -17 |        -70 |
+| d:\croxcut\c projects\OpenGL\core\renderer\gl41_mesh.h            | C++      |         -9 |        -27 |         -8 |        -44 |
+| d:\croxcut\c projects\OpenGL\core\renderer\gl41_renderer.cpp      | C++      |       -123 |        -27 |        -16 |       -166 |
+| d:\croxcut\c projects\OpenGL\core\renderer\gl41_renderer.h        | C++      |        -26 |        -27 |        -14 |        -67 |
+| d:\croxcut\c projects\OpenGL\core\renderer\gl41_shader.cpp        | C++      |        -53 |        -33 |        -14 |       -100 |
+| d:\croxcut\c projects\OpenGL\core\renderer\gl41_shader.h          | C++      |        -20 |        -27 |        -11 |        -58 |
+| d:\croxcut\c projects\OpenGL\core\renderer\pxl_renderer.h         | C++      |        -12 |        -27 |         -4 |        -43 |
+| d:\croxcut\c projects\OpenGL\core\renderer\pxl_renderer_backend.h | C++      |        -47 |        -27 |        -17 |        -91 |
+| d:\croxcut\c projects\OpenGL\core\version.h                       | C++      |         -8 |        -27 |         -4 |        -39 |
+| d:\croxcut\c projects\OpenGL\core\window\window.cpp               | C++      |        -66 |        -28 |        -24 |       -118 |
+| d:\croxcut\c projects\OpenGL\core\window\window.h                 | C++      |        -27 |        -27 |        -13 |        -67 |
+| d:\croxcut\c projects\OpenGL\scene\iapplogic.h                    | C++      |         11 |         27 |          4 |         42 |
+| Total                                                             |          |       -782 |       -414 |       -255 |     -1,451 |
++-------------------------------------------------------------------+----------+------------+------------+------------+------------+

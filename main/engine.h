@@ -50,7 +50,7 @@ private:
 
     void run();
     void init();
-    void tick(const f32& dt);
+    void tick(const f32_t& dt);
     void render();
     void cleanup();
 };

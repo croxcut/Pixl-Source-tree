@@ -37,9 +37,9 @@
 class GL41Shader {
 
 private:
-    u32 vertex;
-    u32 fragment;
-    u32 program;
+    u32_t vertex;
+    u32_t fragment;
+    u32_t program;
 
 public:
     GL41Shader(struct Shader& shader);
@@ -50,8 +50,8 @@ public:
 
 private:
 
-    u32 compile(const char* source, GLenum type);
-    u32 create_program(const u32& vertex, const u32& fragment);
+    u32_t compile(const char* source, GLenum type);
+    u32_t create_program(const u32_t& vertex, const u32_t& fragment);
 
 };
 

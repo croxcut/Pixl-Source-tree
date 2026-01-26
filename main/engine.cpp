@@ -54,7 +54,7 @@ void Engine::init() {
     applogic->init();
 }
 
-void Engine::tick(const f32& dt) {
+void Engine::tick(const f32_t& dt) {
     applogic->tick(dt);
 }
 

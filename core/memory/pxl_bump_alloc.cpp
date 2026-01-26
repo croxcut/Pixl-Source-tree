@@ -29,7 +29,7 @@
 #include "pxl_memory.h"
 
 struct Arena {
-    u8*     memory;
+    u8_t*     memory;
     size_t  offset;
 };
 
@@ -37,14 +37,14 @@ static thread_local Arena t_arena = {};
 
 constexpr size_t ARENA_SIZE = 4 * 1024 * 1024; 
 
-static thread_local u32 t_thread_id = [] {
-    static std::atomic<u32> counter{0};
+static thread_local u32_t t_thread_id = [] {
+    static std::atomic<u32_t> counter{0};
     return counter++;
 }();
 
 static void __pxl_arena_init() {
     if(!t_arena.memory) {
-        t_arena.memory = (u8*)os_alloc(ARENA_SIZE);
+        t_arena.memory = (u8_t*)os_alloc(ARENA_SIZE);
         t_arena.offset = 0;
     }
 }
@@ -61,7 +61,7 @@ static void* __pxl_internal_arena_alloc(size_t size, MemoryTag tag) {
     if(t_arena.offset + size > ARENA_SIZE)
         return nullptr;
 
-    u8* ptr = t_arena.memory + t_arena.offset;
+    u8_t* ptr = t_arena.memory + t_arena.offset;
     t_arena.offset += size;
 
 #if PXL_ENABLE_DEBUG

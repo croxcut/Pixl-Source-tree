@@ -38,12 +38,12 @@ class GL41Renderer : public PXLRenderer {
 
 private:
     
-    std::unordered_map<u64, GL41Shader> gl41_shaders;
-    std::unordered_map<u64, Mesh> gl41_meshes;
+    std::unordered_map<u64_t, GL41Shader> gl41_shaders;
+    std::unordered_map<u64_t, Mesh> gl41_meshes;
 
-    u32 bound_vao = 0;
-    std::vector<u32> bound_textures;
-    u64 current_shader = 0;
+    u32_t bound_vao = 0;
+    std::vector<u32_t> bound_textures;
+    u64_t current_shader = 0;
 
     std::vector<struct DrawCall> draw_queue;
 
@@ -51,16 +51,16 @@ public:
     GL41Renderer();
     ~GL41Renderer();
 
-    u64 add_mesh(struct Mesh& mesh) override;
-    u64 add_shader(struct Shader& shader) override;
+    u64_t add_mesh(struct Mesh& mesh) override;
+    u64_t add_shader(struct Shader& shader) override;
     void submit_draw_call(const struct DrawCall& draw_call) override;
     void draw() override;
     void cleanup() override;
 
 private:
 
-    void draw_mesh(const u64& mesh_id);
-    void use_shader(const u64& shader_id);
+    void draw_mesh(const u64_t& mesh_id);
+    void use_shader(const u64_t& shader_id);
 
 };
 
